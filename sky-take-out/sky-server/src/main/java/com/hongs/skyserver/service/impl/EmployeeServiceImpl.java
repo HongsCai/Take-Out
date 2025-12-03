@@ -1,7 +1,7 @@
 package com.hongs.skyserver.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hongs.skycommon.entity.Employee;
+import com.hongs.skycommon.pojo.entity.Employee;
 import com.hongs.skyserver.service.EmployeeService;
 import com.hongs.skyserver.mapper.EmployeeMapper;
 import org.springframework.stereotype.Service;

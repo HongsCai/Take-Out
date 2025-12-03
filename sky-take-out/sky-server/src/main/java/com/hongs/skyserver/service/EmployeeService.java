@@ -1,6 +1,6 @@
 package com.hongs.skyserver.service;
 
-import com.hongs.skycommon.entity.Employee;
+import com.hongs.skycommon.pojo.entity.Employee;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

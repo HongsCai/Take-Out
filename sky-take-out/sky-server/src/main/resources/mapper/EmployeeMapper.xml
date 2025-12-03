@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hongs.skyserver.mapper.EmployeeMapper">
 
-    <resultMap id="BaseResultMap" type="com.hongs.skycommon.entity.Employee">
+    <resultMap id="BaseResultMap" type="com.hongs.skycommon.pojo.entity.Employee">
             <id property="id" column="id" />
             <result property="name" column="name" />
             <result property="username" column="username" />

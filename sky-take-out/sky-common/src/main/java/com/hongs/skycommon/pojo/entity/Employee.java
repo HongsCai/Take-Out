@@ -1,4 +1,4 @@
-package com.hongs.skycommon.entity;
+package com.hongs.skycommon.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
