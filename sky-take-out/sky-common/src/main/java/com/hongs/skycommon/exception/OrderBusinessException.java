@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class OrderBusinessException extends RuntimeException {
+public class OrderBusinessException extends BaseException {
     public OrderBusinessException() {
 
     }

@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class PasswordErrorException extends RuntimeException {
+public class PasswordErrorException extends BaseException {
     public PasswordErrorException() {
 
     }

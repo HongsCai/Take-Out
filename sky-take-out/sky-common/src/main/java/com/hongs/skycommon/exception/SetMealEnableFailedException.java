@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class SetMealEnableFailedException extends RuntimeException {
+public class SetMealEnableFailedException extends BaseException {
     public SetMealEnableFailedException() {
 
     }

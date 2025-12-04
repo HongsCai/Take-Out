@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class AccountNotFoundException extends RuntimeException {
+public class AccountNotFoundException extends BaseException {
     public AccountNotFoundException() {
 
     }

@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class UserNotLoginException extends RuntimeException {
+public class UserNotLoginException extends BaseException {
     public UserNotLoginException() {
 
     }

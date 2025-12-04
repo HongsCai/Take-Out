@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(BaseException.class)
     public BaseResponse handleException(BaseException e) {
         log.error("异常信息：{}", e.getMessage());
         return BaseResponse.error(e.getMessage());

@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class DeletionNotAllowedException extends RuntimeException {
+public class DeletionNotAllowedException extends BaseException {
     public DeletionNotAllowedException() {
 
     }

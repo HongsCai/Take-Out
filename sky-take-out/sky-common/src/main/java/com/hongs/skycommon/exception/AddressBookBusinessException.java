@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class AddressBookBusinessException extends RuntimeException {
+public class AddressBookBusinessException extends BaseException {
     public AddressBookBusinessException() {
 
     }

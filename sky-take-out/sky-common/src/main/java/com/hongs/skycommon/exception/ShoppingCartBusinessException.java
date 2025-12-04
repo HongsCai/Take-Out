@@ -1,6 +1,6 @@
 package com.hongs.skycommon.exception;
 
-public class ShoppingCartBusinessException extends RuntimeException {
+public class ShoppingCartBusinessException extends BaseException {
     public ShoppingCartBusinessException() {
 
     }
