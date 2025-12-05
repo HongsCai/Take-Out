@@ -28,3 +28,30 @@
 
 
 
+# 2025年12月5日
+
+## 使用Knife4j出现文档请求异常
+
+springboot3.x以上就需要换knife4j依赖为4.x版本的knife4j-openapi3-jakarta-spring-boot-starter依赖
+
+```xml
+<dependency>
+    <groupId>com.github.xiaoymin</groupId>
+    <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+    <version>4.4.0</version>
+</dependency>
+```
+
+由于从Swagger2变更到Openapi3的标准，故注解以及配置类全部重新该
+
+> 由于Springboot版本为3.5.8不支持Knife4j最新的4.4.0版本，故将Springboot版本降低为3.2.5（悲
+
+```xml
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+    </parent>
+```
+
+![image-20251205184952133](./assets/image-20251205184952133.png)

@@ -13,6 +13,11 @@ spring:
     username: ${sky.datasource.username}
     password: ${sky.datasource.password}
 
+springdoc:
+  api-docs:
+    enabled: true
+  packages-to-scan: com.hongs.skyserver.controller
+
 mybatis-plus:
   mapper-locations: classpath*:/mapper/*.xml
   type-aliases-package: com.hongs.skycommon.pojo.entity
