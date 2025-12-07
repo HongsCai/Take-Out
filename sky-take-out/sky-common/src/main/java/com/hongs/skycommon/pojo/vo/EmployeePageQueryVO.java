@@ -2,17 +2,13 @@ package com.hongs.skycommon.pojo.vo;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Schema(description = "员工分页查询返回VO")
 public class EmployeePageQueryVO implements Serializable {
 

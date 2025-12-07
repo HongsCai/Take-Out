@@ -1,9 +1,6 @@
 package com.hongs.skyserver.service;
 
-import com.hongs.skycommon.pojo.dto.EmployeeDTO;
-import com.hongs.skycommon.pojo.dto.EmployeeLoginDTO;
-import com.hongs.skycommon.pojo.dto.EmployeePageQueryDTO;
-import com.hongs.skycommon.pojo.dto.EmployeeUpdateInfoDTO;
+import com.hongs.skycommon.pojo.dto.*;
 import com.hongs.skycommon.pojo.entity.Employee;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hongs.skycommon.pojo.vo.EmployeeGetOneByIdVO;
@@ -65,4 +62,11 @@ public interface EmployeeService extends IService<Employee> {
      * @return
      */
     void updateInfo(EmployeeUpdateInfoDTO employeeUpdateInfoDTO);
+
+    /**
+     * 修改密码
+     * @param employeeEditPasswordDTO
+     * @return
+     */
+    void editPassword(EmployeeEditPasswordDTO employeeEditPasswordDTO);
 }

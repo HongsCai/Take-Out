@@ -1,9 +1,6 @@
 package com.hongs.skyserver.controller.admin;
 
-import com.hongs.skycommon.pojo.dto.EmployeeDTO;
-import com.hongs.skycommon.pojo.dto.EmployeeLoginDTO;
-import com.hongs.skycommon.pojo.dto.EmployeePageQueryDTO;
-import com.hongs.skycommon.pojo.dto.EmployeeUpdateInfoDTO;
+import com.hongs.skycommon.pojo.dto.*;
 import com.hongs.skycommon.pojo.entity.Employee;
 import com.hongs.skycommon.pojo.vo.EmployeeGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.EmployeeLoginVO;
@@ -58,6 +55,7 @@ public class EmployeeController {
 
     /**
      * 新增员工
+     *
      * @param employeeDTO
      * @return
      */
@@ -71,6 +69,7 @@ public class EmployeeController {
 
     /**
      * 员工分页查询
+     *
      * @param pageQueryDTO
      * @return
      */
@@ -84,6 +83,7 @@ public class EmployeeController {
 
     /**
      * 启用禁用员工账号
+     *
      * @param status
      * @param id
      * @return
@@ -98,6 +98,7 @@ public class EmployeeController {
 
     /**
      * 根据ID查询员工
+     *
      * @param id
      * @return
      */
@@ -111,6 +112,7 @@ public class EmployeeController {
 
     /**
      * 修改员工信息
+     *
      * @param employeeUpdateInfoDTO
      * @return
      */
@@ -119,6 +121,19 @@ public class EmployeeController {
     public Result updateInfo(@RequestBody EmployeeUpdateInfoDTO employeeUpdateInfoDTO) {
         log.info("修改员工信息: {}", employeeUpdateInfoDTO);
         employeeService.updateInfo(employeeUpdateInfoDTO);
+        return Result.success();
+    }
+
+    /**
+     * 修改密码
+     * @param employeeEditPasswordDTO
+     * @return
+     */
+    @Operation(summary = "修改密码")
+    @PutMapping("/editPassword")
+    public Result editPassword(@RequestBody EmployeeEditPasswordDTO employeeEditPasswordDTO) {
+        log.info("修改密码: {}", employeeEditPasswordDTO);
+        employeeService.editPassword(employeeEditPasswordDTO);
         return Result.success();
     }
 }

@@ -3,10 +3,12 @@ package com.hongs.skycommon.pojo.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serializable;
+
 
 @Data
 @Schema(description = "根据ID查询员工VO")
-public class EmployeeGetOneByIdVO {
+public class EmployeeGetOneByIdVO implements Serializable {
     @Schema(description = "ID")
     private Long id;
 

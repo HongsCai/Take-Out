@@ -16,7 +16,7 @@ import java.util.List;
 public class PageResult<T> implements Serializable {
 
     @Schema(description = "总记录数")
-    private long total;
+    private Long total;
 
     @Schema(description = "当前页数据集合")
     private List<T> records;

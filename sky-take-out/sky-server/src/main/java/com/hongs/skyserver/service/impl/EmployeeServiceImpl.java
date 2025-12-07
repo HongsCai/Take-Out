@@ -12,11 +12,9 @@ import com.hongs.skycommon.constant.StatusConstant;
 import com.hongs.skycommon.context.BaseContext;
 import com.hongs.skycommon.exception.AccountLockedException;
 import com.hongs.skycommon.exception.AccountNotFoundException;
+import com.hongs.skycommon.exception.PasswordEditFailedException;
 import com.hongs.skycommon.exception.PasswordErrorException;
-import com.hongs.skycommon.pojo.dto.EmployeeDTO;
-import com.hongs.skycommon.pojo.dto.EmployeeLoginDTO;
-import com.hongs.skycommon.pojo.dto.EmployeePageQueryDTO;
-import com.hongs.skycommon.pojo.dto.EmployeeUpdateInfoDTO;
+import com.hongs.skycommon.pojo.dto.*;
 import com.hongs.skycommon.pojo.entity.Employee;
 import com.hongs.skycommon.pojo.vo.EmployeeGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.EmployeeLoginVO;
@@ -201,5 +199,22 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         employee.setUpdateUser(BaseContext.getCurrentId());
         employee.setUpdateTime(LocalDateTime.now());
         this.update(employee);
+    }
+
+    /**
+     * 修改密码
+     * @param employeeEditPasswordDTO
+     * @return
+     */
+    @Override
+    public void editPassword(EmployeeEditPasswordDTO employeeEditPasswordDTO) {
+        Employee employee = this.getById(BaseContext.getCurrentId());
+        if (!employee.getPassword().equals(DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getOldPassword().getBytes()))) {
+            throw new PasswordEditFailedException(MessageConstant.PASSWORD_ERROR);
+        }
+        LambdaUpdateWrapper<Employee> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.eq(Employee::getId, BaseContext.getCurrentId())
+                .set(Employee::getPassword, DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getNewPassword().getBytes()));
+        this.update(lambdaUpdateWrapper);
     }
 }
