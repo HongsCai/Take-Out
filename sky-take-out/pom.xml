@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.2.12</version>
     </parent>
 
     <groupId>com.hongs</groupId>
@@ -30,7 +30,7 @@
         <druid.spring.boot.starter>1.2.23</druid.spring.boot.starter>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
-        <knife4j>4.4.0</knife4j>
+        <knife4j>4.5.0</knife4j>
         <jjwt>0.9.1</jjwt>
         <jaxb-api>2.3.1</jaxb-api>
         <poi>3.16</poi>
