@@ -2,8 +2,12 @@ package com.hongs.skyserver.service;
 
 import com.hongs.skycommon.pojo.dto.EmployeeDTO;
 import com.hongs.skycommon.pojo.dto.EmployeeLoginDTO;
+import com.hongs.skycommon.pojo.dto.EmployeePageQueryDTO;
 import com.hongs.skycommon.pojo.entity.Employee;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hongs.skycommon.pojo.vo.EmployeeLoginVO;
+import com.hongs.skycommon.pojo.vo.EmployeePageQueryVO;
+import com.hongs.skycommon.result.PageResult;
 
 /**
 * @author Hongs
@@ -16,7 +20,7 @@ public interface EmployeeService extends IService<Employee> {
      * @param employeeLoginDTO
      * @return
      */
-    Employee login(EmployeeLoginDTO employeeLoginDTO);
+    EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO);
 
     /**
      * 新增员工
@@ -24,4 +28,11 @@ public interface EmployeeService extends IService<Employee> {
      * @return
      */
     void save(EmployeeDTO employeeDTO);
+
+    /**
+     * 员工分页查询
+     * @param pageQueryDTO
+     * @return
+     */
+    PageResult<EmployeePageQueryVO> page(EmployeePageQueryDTO pageQueryDTO);
 }

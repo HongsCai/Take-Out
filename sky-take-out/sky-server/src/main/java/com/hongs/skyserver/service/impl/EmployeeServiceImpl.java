@@ -1,7 +1,10 @@
 package com.hongs.skyserver.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hongs.skycommon.constant.JwtClaimsConstant;
 import com.hongs.skycommon.constant.MessageConstant;
 import com.hongs.skycommon.constant.PasswordConstant;
 import com.hongs.skycommon.constant.StatusConstant;
@@ -11,14 +14,25 @@ import com.hongs.skycommon.exception.AccountNotFoundException;
 import com.hongs.skycommon.exception.PasswordErrorException;
 import com.hongs.skycommon.pojo.dto.EmployeeDTO;
 import com.hongs.skycommon.pojo.dto.EmployeeLoginDTO;
+import com.hongs.skycommon.pojo.dto.EmployeePageQueryDTO;
 import com.hongs.skycommon.pojo.entity.Employee;
+import com.hongs.skycommon.pojo.vo.EmployeeLoginVO;
+import com.hongs.skycommon.pojo.vo.EmployeePageQueryVO;
+import com.hongs.skycommon.properties.JwtProperties;
+import com.hongs.skycommon.result.PageResult;
+import com.hongs.skycommon.utils.JwtUtil;
 import com.hongs.skyserver.service.EmployeeService;
 import com.hongs.skyserver.mapper.EmployeeMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Hongs
@@ -29,13 +43,16 @@ import java.time.LocalDateTime;
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     implements EmployeeService{
 
+    @Autowired
+    private JwtProperties jwtProperties;
+
     /**
      * 员工登录
      * @param employeeLoginDTO
      * @return
      */
     @Override
-    public Employee login(EmployeeLoginDTO employeeLoginDTO) {
+    public EmployeeLoginVO login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
 
@@ -56,7 +73,19 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
 
-        return employee;
+        // 登录成果生成Jwt令牌
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstant.EMP_ID, employee.getId());
+        String token = JwtUtil.createJWT(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
+
+        EmployeeLoginVO employeeLoginVO = EmployeeLoginVO.builder()
+                .id(employee.getId())
+                .userName(employee.getUsername())
+                .name(employee.getName())
+                .token(token)
+                .build();
+
+        return employeeLoginVO;
     }
 
     /**
@@ -84,6 +113,29 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         employee.setUpdateUser(BaseContext.getCurrentId());
 
         this.save(employee);
+    }
+
+    /**
+     * 员工分页查询
+     * @param pageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<EmployeePageQueryVO> page(EmployeePageQueryDTO pageQueryDTO) {
+        IPage<Employee> iPage = new Page(pageQueryDTO.getPage(), pageQueryDTO.getPageSize());
+        LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(Employee::getUpdateTime)
+                .orderByDesc(Employee::getCreateTime);
+        wrapper.like(StringUtils.hasText(pageQueryDTO.getName()), Employee::getName, pageQueryDTO.getName());
+        this.page(iPage, wrapper);
+
+        List<EmployeePageQueryVO> employeePageQueryVOList = iPage.getRecords().stream().map(employee -> {
+            EmployeePageQueryVO employeePageQueryVO = new EmployeePageQueryVO();
+            BeanUtils.copyProperties(employee, employeePageQueryVO);
+            return employeePageQueryVO;
+        }).toList();
+
+        return new PageResult<EmployeePageQueryVO>(iPage.getTotal(), employeePageQueryVOList);
     }
 }
 

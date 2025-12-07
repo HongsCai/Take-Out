@@ -12,9 +12,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(description = "员工登录返回的数据格式")
+@Schema(description = "员工登录返回VO")
 public class EmployeeLoginVO implements Serializable {
-    @Schema(description = "主键值")
+    @Schema(description = "ID")
     private Long id;
 
     @Schema(description = "用户名")
