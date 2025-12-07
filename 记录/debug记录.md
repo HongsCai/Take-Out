@@ -1,3 +1,28 @@
+# 2025年12月2日
+
+## 无法找到javax/xml/bind/DatatypeConverter
+
+1. **环境**：使用的是 **JDK 17**。
+2. **代码**：项目中使用的 JWT 工具包版本是 `jjwt:0.9.1`（这是一个 2018 年的老版本）。
+3. **冲突点**：`jjwt:0.9.1` 的底层依赖于 `javax.xml.bind.DatatypeConverter` 这个类来做 Base64 解码。
+	- 这个类在 JDK 8 中是内置的。
+	- 但是，**从 JDK 11 开始，Java 官方把 `javax.xml.bind` 包彻底移除了**。
+4. **结果**：当代码运行到 `JwtUtil` 解析令牌时，JVM 在 JDK 17 里找不到这个类，于是抛出 `ClassNotFoundException: javax.xml.bind.DatatypeConverter`。
+
+
+
+添加依赖
+
+```xml
+<dependency>
+    <groupId>javax.xml.bind</groupId>
+    <artifactId>jaxb-api</artifactId>
+    <version>2.3.1</version>
+</dependency>
+```
+
+
+
 # 2025年12月4日
 
 ## 登录失败无报错提示信息
