@@ -63,19 +63,19 @@ springboot3.x以上就需要换knife4j依赖为4.x版本的knife4j-openapi3-jaka
 <dependency>
     <groupId>com.github.xiaoymin</groupId>
     <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-    <version>4.4.0</version>
+    <version>4.5.0</version>
 </dependency>
 ```
 
 由于从Swagger2变更到Openapi3的标准，故注解以及配置类全部重新该
 
-> 由于Springboot版本为3.5.8不支持Knife4j最新的4.4.0版本，故将Springboot版本降低为3.2.5（悲
+> 由于Springboot版本为3.5.8不支持Knife4j最新的4.5.0版本，故将Springboot版本降低为3.2.12（悲
 
 ```xml
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.2.12</version>
     </parent>
 ```
 
@@ -111,4 +111,47 @@ springboot3.x以上就需要换knife4j依赖为4.x版本的knife4j-openapi3-jaka
 
 
 ![image-20251207103648832](./assets/image-20251207103648832.png)
+
+
+
+## 扩展 Spring MVC 框架的消息转换器后Knife4j文档请求异常
+
+源代码如下
+
+```java
+public class WebMvcConfig extends WebMvcConfigurationSupport {
+    /**
+     * 扩展 Spring MVC 框架的消息转换器
+     * @param converters
+     */
+    @Override
+    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+
+        log.info("扩展消息转换器...");
+
+        // 1. 创建一个消息转换器对象
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+
+        // 2. 需要为消息转换器设置一个对象转换器，对象转换器可以将 Java 对象序列化为 JSON 数据
+        converter.setObjectMapper(new JacksonObjectMapper());
+
+        // 3. 将自己的消息转换器加入到容器中
+        converters.add(0, converter);
+    }
+}
+```
+
+
+
+原因是扩展 Spring MVC 框架的消息转换器更改了Knife4j的json数据解析，解决方式将消息转换器的优先级调低。
+
+```java
+converters.add(1, converter);
+```
+
+或者
+
+```jav
+converters.add(converters.size() - 1, converter);
+```
 
