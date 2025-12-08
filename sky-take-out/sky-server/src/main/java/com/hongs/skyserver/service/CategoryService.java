@@ -46,6 +46,13 @@ public interface CategoryService extends IService<Category> {
     void updateInfo(CategoryUpdateInfoDTO categorySaveDTO);
 
     /**
+     * 根据ID删除分类
+     * @param id
+     * @return
+     */
+    void deleteById(Long id);
+
+    /**
      * 根据类型查询分类
      * @param type
      * @return

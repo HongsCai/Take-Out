@@ -110,7 +110,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
                 .sex(employeeSaveDTO.getSex())
                 .idNumber(employeeSaveDTO.getIdNumber())
                 .phone(employeeSaveDTO.getPhone())
-                .status(StatusConstant.ENABLE)
+                .status(StatusConstant.DISABLE)
                 .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()))
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
