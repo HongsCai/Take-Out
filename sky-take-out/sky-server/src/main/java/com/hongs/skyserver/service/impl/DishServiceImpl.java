@@ -1,10 +1,9 @@
-package com/hongs/skyserver.service.impl;
+package com.hongs.skyserver.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-/hongs/skyserver.pojo.Dish;
-/hongs/skyserver.service.DishService;
-import com/hongs/skyserver.mapper.DishMapper;
 import com.hongs.skycommon.pojo.entity.Dish;
+import com.hongs.skyserver.mapper.DishMapper;
+import com.hongs.skyserver.service.DishService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Service;
 */
 @Service
 public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
-    implements DishService{
+    implements DishService {
 
 }
 

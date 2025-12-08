@@ -1,6 +1,5 @@
-package com.hongs.skycommon.pojo.entity
+package com.hongs.skycommon.pojo.entity;
 
-/hongs/skyserver.pojo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

@@ -1,6 +1,5 @@
-package com/hongs/skyserver.service;
+package com.hongs.skyserver.service;
 
-import com/hongs/skyserver.pojo.Dish;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hongs.skycommon.pojo.entity.Dish;
 
