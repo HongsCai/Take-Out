@@ -1,7 +1,6 @@
 package com.hongs.skyserver.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,15 +21,14 @@ import com.hongs.skycommon.pojo.vo.EmployeePageQueryVO;
 import com.hongs.skycommon.properties.JwtProperties;
 import com.hongs.skycommon.result.PageResult;
 import com.hongs.skycommon.utils.JwtUtil;
-import com.hongs.skyserver.service.EmployeeService;
 import com.hongs.skyserver.mapper.EmployeeMapper;
+import com.hongs.skyserver.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,10 +110,6 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
                 .phone(employeeSaveDTO.getPhone())
                 .status(StatusConstant.DISABLE)
                 .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()))
-                .createTime(LocalDateTime.now())
-                .updateTime(LocalDateTime.now())
-                .createUser(BaseContext.getCurrentId())
-                .updateUser(BaseContext.getCurrentId())
                 .build();
         this.save(employee);
     }
@@ -144,26 +138,6 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     }
 
     /**
-     * 通用员工更新
-     * @param employee
-     */
-    @Override
-    public void update(Employee employee) {
-        LambdaUpdateWrapper<Employee> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(Employee::getId, employee.getId())
-                .set(employee.getName() != null, Employee::getName, employee.getName())
-                .set(employee.getUsername() != null, Employee::getUsername, employee.getUsername())
-                .set(employee.getPassword() != null, Employee::getPassword, employee.getPassword())
-                .set(employee.getPhone() != null, Employee::getPhone, employee.getPhone())
-                .set(employee.getSex() != null, Employee::getSex, employee.getSex())
-                .set(employee.getIdNumber() != null, Employee::getIdNumber, employee.getIdNumber())
-                .set(employee.getUpdateTime() != null, Employee::getUpdateTime, employee.getUpdateTime())
-                .set(employee.getUpdateUser() != null, Employee::getUpdateUser, employee.getUpdateUser())
-                .set(employee.getStatus() != null, Employee::getStatus, employee.getStatus());
-        this.update(wrapper);
-    }
-
-    /**
      * 启用禁用员工账号
      * @param status
      * @param id
@@ -175,7 +149,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
                 .id(id)
                 .status(status)
                 .build();
-        this.update(employee);
+        this.updateById(employee);
     }
 
     /**
@@ -200,9 +174,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     public void updateInfo(EmployeeUpdateInfoDTO employeeUpdateInfoDTO) {
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeUpdateInfoDTO, employee);
-        employee.setUpdateUser(BaseContext.getCurrentId());
-        employee.setUpdateTime(LocalDateTime.now());
-        this.update(employee);
+        this.updateById(employee);
     }
 
     /**
@@ -212,13 +184,19 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
      */
     @Override
     public void editPassword(EmployeeEditPasswordDTO employeeEditPasswordDTO) {
-        Employee employee = this.getById(BaseContext.getCurrentId());
-        if (!employee.getPassword().equals(DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getOldPassword().getBytes()))) {
+        Long currentId = BaseContext.getCurrentId();
+        Employee employee = this.getById(currentId);
+
+        String oldPasswordHash = DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getOldPassword().getBytes());
+        if (!employee.getPassword().equals(oldPasswordHash)) {
             throw new PasswordEditFailedException(MessageConstant.PASSWORD_ERROR);
         }
-        LambdaUpdateWrapper<Employee> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.eq(Employee::getId, BaseContext.getCurrentId())
-                .set(Employee::getPassword, DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getNewPassword().getBytes()));
-        this.update(lambdaUpdateWrapper);
+
+        Employee updateEmployee = Employee.builder()
+                .id(currentId)
+                .password(DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getNewPassword().getBytes()))
+                .build();
+
+        this.updateById(updateEmployee);
     }
 }

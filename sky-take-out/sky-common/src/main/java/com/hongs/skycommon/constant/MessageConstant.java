@@ -1,7 +1,7 @@
 package com.hongs.skycommon.constant;
 
 /**
- * 信息提示常量类
+ * 信息提示常量
  */
 public class MessageConstant {
     public static final String PASSWORD_ERROR = "密码错误";

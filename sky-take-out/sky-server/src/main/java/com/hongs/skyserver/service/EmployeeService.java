@@ -36,12 +36,6 @@ public interface EmployeeService extends IService<Employee> {
     PageResult<EmployeePageQueryVO> page(EmployeePageQueryDTO employeePageQueryDTO);
 
     /**
-     * 通用员工信息更新
-     * @param employee
-     */
-    void update(Employee employee);
-
-    /**
      * 启用禁用员工账号
      * @param status
      * @param id
