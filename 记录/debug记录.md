@@ -155,3 +155,82 @@ converters.add(1, converter);
 converters.add(converters.size() - 1, converter);
 ```
 
+
+
+# 2025年12月9日
+
+## 自动填充字段失败1 (Mybatis-Plus配置)
+
+<font color='red'>在 `update(Wrapper<T> updateWrapper)` 时不会自动填充，需要手动赋值字段条件。</font>
+
+```java
+    /**
+     * 启用禁用分类
+     * @param status
+     * @param id
+     * @return
+     */
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        LambdaUpdateWrapper<Category> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Category::getId, id)
+                .set(status != null, Category::getStatus, status);
+        this.update(wrapper);
+    }
+```
+
+```java
+    /**
+     * 启用禁用分类
+     * @param status
+     * @param id
+     * @return
+     */
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        Category category = Category.builder()
+                .id(id)
+                .status(status)
+                .build();
+        this.updateById(category);
+    }
+```
+
+
+
+## 自动填充字段出现失败2 (Mybatis-Plus配置)
+
+手动实现中，反射需要依靠方法名
+
+```java
+package com.hongs.skycommon.constant;
+
+/**
+ * 公共字段自动填充相关常量
+ */
+public class AutoFillConstant {
+    public static final String SET_CREATE_TIME = "setCreateTime";
+    public static final String SET_UPDATE_TIME = "setUpdateTime";
+    public static final String SET_CREATE_USER = "setCreateUser";
+    public static final String SET_UPDATE_USER = "setUpdateUser";
+}
+```
+
+
+
+Mybatis-Plus，的使用中只需要属性即可
+
+```java
+package com.hongs.skycommon.constant;
+
+/**
+ * 公共字段自动填充相关常量
+ */
+public class AutoFillConstant {
+    public static final String CREATE_TIME = "createTime";
+    public static final String UPDATE_TIME = "updateTime";
+    public static final String CREATE_USER = "createUser";
+    public static final String UPDATE_USER = "updateUser";
+}
+```
+
