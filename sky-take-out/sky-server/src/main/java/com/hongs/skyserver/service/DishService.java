@@ -1,6 +1,7 @@
 package com.hongs.skyserver.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hongs.skycommon.pojo.dto.DishSaveDTO;
 import com.hongs.skycommon.pojo.entity.Dish;
 
 /**
@@ -9,5 +10,11 @@ import com.hongs.skycommon.pojo.entity.Dish;
 * @createDate 2025-12-08 18:24:50
 */
 public interface DishService extends IService<Dish> {
+
+    /**
+     * 保存菜品及对应口味
+     * @param dishSaveDTO
+     */
+    void saveWithFlavor(DishSaveDTO dishSaveDTO);
 
 }

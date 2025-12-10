@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hongs.skyserver.mapper.DishFlavorMapper">
+
+    <resultMap id="BaseResultMap" type="com.hongs.skycommon.pojo.entity.DishFlavor">
+            <id property="id" column="id" />
+            <result property="dishId" column="dish_id" />
+            <result property="name" column="name" />
+            <result property="value" column="value" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,dish_id,name,value
+    </sql>
+</mapper>
