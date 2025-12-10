@@ -25,8 +25,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
     @Autowired
     private DishFlavorService dishFlavorService;
-    @Autowired
-    private DishService dishService;
 
     /**
      * 保存菜品
