@@ -40,7 +40,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
         // 向口味表插入多条数据
         List<DishFlavor> dishFlavors = dishSaveDTO.getFlavors();
-        if (dishFlavors != null && dishFlavors.isEmpty()) {
+        if (dishFlavors != null && !dishFlavors.isEmpty()) {
             dishFlavors.forEach(dishFlavor -> dishFlavor.setDishId(dish.getId()));
             dishFlavorService.saveBatch(dishFlavors);
         }
