@@ -22,4 +22,22 @@
         id,category_id,name,price,status,description,
         image,create_time,update_time,create_user,update_user
     </sql>
+
+    <select id="pageQuery" resultType="com.hongs.skycommon.pojo.vo.SetmealPageQueryVO">
+        select s.id, s.category_id, s.name, s.price, s.status, s.description,
+        s.image, s.update_time, c.name as category_name
+        from setmeal s
+        left join category c on s.category_id = c.id
+        <where>
+            <if test="setmealPageQueryDTO.categoryId.name != null and setmealPageQueryDTO.categoryId.name != ''">
+                and s.name like concat('%', #{setmealPageQueryDTO.categoryId.name}, '%')
+            </if>
+            <if test="setmealPageQueryDTO.categoryId != null">
+                and s.category_id = #{setmealPageQueryDTO.categoryId}
+            </if>
+            <if test="setmealPageQueryDTO.status != null">
+                and s.status = #{setmealPageQueryDTO.status}
+            </if>
+        </where>
+    </select>
 </mapper>

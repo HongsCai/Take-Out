@@ -1,10 +1,13 @@
 package com.hongs.skyserver.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hongs.skycommon.pojo.entity.SetmealDish;
 import com.hongs.skyserver.service.SetmealDishService;
 import com.hongs.skyserver.mapper.SetmealDishMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
 * @author Hongs
@@ -15,6 +18,19 @@ import org.springframework.stereotype.Service;
 public class SetmealDishServiceImpl extends ServiceImpl<SetmealDishMapper, SetmealDish>
     implements SetmealDishService{
 
+    /**
+     * 根据菜品id查询套餐id
+     * @param dishId
+     * @return
+     */
+    @Override
+    public List<Long> getSetmealIdsByDishId(Long dishId) {
+        List<SetmealDish> setmealDishes = this.list(new LambdaQueryWrapper<SetmealDish>()
+                .eq(SetmealDish::getDishId, dishId));
+        return setmealDishes.stream().map(setmealDish -> {
+            return setmealDish.getSetmealId();
+        }).toList();
+    }
 }
 
 

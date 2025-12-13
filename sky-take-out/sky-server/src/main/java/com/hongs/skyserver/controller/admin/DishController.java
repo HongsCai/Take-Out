@@ -12,6 +12,7 @@ import com.hongs.skyserver.service.DishService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,7 +50,7 @@ public class DishController {
      */
     @Operation(summary = "菜品分页查询")
     @GetMapping("/page")
-    public Result<PageResult> page(DishPageQueryDTO dishPageQueryDTO) {
+    public Result<PageResult> page(@ParameterObject DishPageQueryDTO dishPageQueryDTO) {
         log.info("菜品分页查询: {}", dishPageQueryDTO);
         PageResult<DishPageQueryVO> pageResult = dishService.page(dishPageQueryDTO);
         return Result.success(pageResult);
@@ -62,7 +63,7 @@ public class DishController {
      */
     @Operation(summary = "批量删除")
     @DeleteMapping
-    public Result delete(@RequestParam List<Long> ids) {
+    public Result deleteBatchByIds(@RequestParam List<Long> ids) {
         log.info("批量删除: {}", ids);
         dishService.deleteBatchByIds(ids);
         return Result.success();
@@ -114,7 +115,7 @@ public class DishController {
     @Operation(summary = "菜品起售停售")
     @PostMapping("/status/{status}")
     public Result updateStatus(@PathVariable Integer status, Long id) {
-        log.info("菜品起售停售: {}", status);
+        log.info("菜品起售停售: {}, {}", status, id);
         dishService.updateStatus(status, id);
         return Result.success();
     }

@@ -1,7 +1,12 @@
 package com.hongs.skyserver.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hongs.skycommon.pojo.dto.SetmealPageQueryDTO;
 import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
+
+import java.util.List;
 
 /**
 * @author Hongs
@@ -10,6 +15,14 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.hongs.skycommon.pojo.entity.Setmeal
 */
 public interface SetmealMapper extends BaseMapper<Setmeal> {
+
+    /**
+     * 套餐分页查询
+     * @param page
+     * @param setmealPageQueryDTO
+     * @return
+     */
+    Page<SetmealPageQueryVO> pageQuery(Page<SetmealPageQueryVO> page, SetmealPageQueryDTO setmealPageQueryDTO);
 
 }
 

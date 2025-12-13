@@ -12,6 +12,7 @@ import com.hongs.skycommon.pojo.dto.DishPageQueryDTO;
 import com.hongs.skycommon.pojo.dto.DishSaveDTO;
 import com.hongs.skycommon.pojo.entity.Dish;
 import com.hongs.skycommon.pojo.entity.DishFlavor;
+import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.hongs.skycommon.pojo.entity.SetmealDish;
 import com.hongs.skycommon.pojo.vo.DishGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.DishPageQueryVO;
@@ -20,6 +21,7 @@ import com.hongs.skyserver.mapper.DishMapper;
 import com.hongs.skyserver.service.DishFlavorService;
 import com.hongs.skyserver.service.DishService;
 import com.hongs.skyserver.service.SetmealDishService;
+import com.hongs.skyserver.service.SetmealService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
     @Autowired
     private SetmealDishService setmealDishService;
+
+    @Autowired
+    private SetmealService setmealService;
 
     /**
      * 保存菜品
@@ -85,6 +90,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         if (this.count(new LambdaQueryWrapper<Dish>().in(Dish::getId, ids).eq(Dish::getStatus, StatusConstant.ENABLE)) > 0) {
             throw new BaseException(MessageConstant.DISH_ON_SALE);
         }
+
         // 判断当前菜品是否被套餐关联
         if (setmealDishService.count(new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getDishId, ids)) > 0) {
             throw new BaseException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
@@ -149,6 +155,22 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Override
     public void updateStatus(Integer status, Long id) {
+        // 如果是停售操作，需要处理关联的套餐
+        if (StatusConstant.DISABLE.equals(status)) {
+            // 查询包含当前菜品的关联数据
+            List<Long> setmealIds = setmealDishService.getSetmealIdsByDishId(id); // 需要在Service里补充这个方法
+
+            if (setmealIds != null && !setmealIds.isEmpty()) {
+                // 将这些关联的套餐状态也改为停售
+                Setmeal setmeal = Setmeal.builder()
+                        .status(StatusConstant.DISABLE)
+                        .build();
+                LambdaQueryWrapper<Setmeal> wrapper = new LambdaQueryWrapper<>();
+                wrapper.in(Setmeal::getId, setmealIds);
+                setmealService.update(setmeal, wrapper);
+            }
+        }
+
         Dish dish = Dish.builder()
                 .id(id)
                 .status(status)
