@@ -77,15 +77,15 @@ public class SetmealController {
     }
 
     /**
-     * 套餐起售停售
+     * 套餐启售停售
      * @param status
      * @param id
      * @return
      */
-    @Operation(summary = "套餐起售停售")
+    @Operation(summary = "套餐启售停售")
     @PostMapping("/status/{status}")
     public Result updateStatus(@PathVariable Integer status, Long id) {
-        log.info("套餐起售停售: {}, {}", status, id);
+        log.info("套餐启售停售: {}, {}", status, id);
         setmealService.updateStatus(status, id);
         return Result.success();
     }

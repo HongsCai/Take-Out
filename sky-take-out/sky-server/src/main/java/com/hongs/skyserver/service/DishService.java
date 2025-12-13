@@ -57,7 +57,7 @@ public interface DishService extends IService<Dish> {
     void updateWithFlavor(DishSaveDTO dishSaveDTO);
 
     /**
-     * 菜品起售停售
+     * 菜品启售停售
      * @param status
      * @param id
      */

@@ -8,12 +8,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hongs.skycommon.constant.MessageConstant;
 import com.hongs.skycommon.constant.StatusConstant;
 import com.hongs.skycommon.exception.DeletionNotAllowedException;
+import com.hongs.skycommon.exception.SetMealEnableFailedException;
 import com.hongs.skycommon.pojo.dto.SetmealPageQueryDTO;
 import com.hongs.skycommon.pojo.dto.SetmealSaveDTO;
+import com.hongs.skycommon.pojo.entity.Dish;
 import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.hongs.skycommon.pojo.entity.SetmealDish;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
 import com.hongs.skycommon.result.PageResult;
+import com.hongs.skyserver.service.DishService;
 import com.hongs.skyserver.service.SetmealDishService;
 import com.hongs.skyserver.service.SetmealService;
 import com.hongs.skyserver.mapper.SetmealMapper;
@@ -35,6 +38,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
 
     @Autowired
     private SetmealDishService setmealDishService;
+
+    @Autowired
+    private DishService dishService;
 
     /**
      * 新增套餐
@@ -113,13 +119,28 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     }
 
     /**
-     * 套餐起售停售
+     * 套餐启售停售
      * @param status
      * @param id
      * @return
      */
     @Override
     public void updateStatus(Integer status, Long id) {
+        // 判断当前是否要更改为启售
+        if (status.equals(StatusConstant.ENABLE)) {
+            // 查询当前套餐的菜品数据
+            List<Long> dishIdList = setmealDishService.getDishIdsBySetmealId(id);
+            if (dishIdList != null && !dishIdList.isEmpty()) {
+                Long count = dishService.count(new LambdaQueryWrapper<Dish>()
+                        .in(Dish::getId, dishIdList)
+                        .eq(Dish::getStatus, StatusConstant.DISABLE));
+                // 如果存在停售的菜品，则抛出异常
+                if (count > 0) {
+                    throw new SetMealEnableFailedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                }
+            }
+        }
+
         Setmeal setmeal = Setmeal.builder()
                 .id(id)
                 .status(status)

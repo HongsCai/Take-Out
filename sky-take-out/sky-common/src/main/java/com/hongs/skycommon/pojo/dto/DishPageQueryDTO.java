@@ -15,7 +15,7 @@ public class DishPageQueryDTO implements Serializable {
     @Schema(description = "菜品分类id")
     private Long categoryId;
 
-    @Schema(description = "0 停售 1 起售")
+    @Schema(description = "0 停售 1 启售")
     private Integer status;
 
     @Schema(description = "页码")

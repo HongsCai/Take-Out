@@ -22,7 +22,7 @@ public class SetmealPageQueryVO implements Serializable {
     @Schema(description = "套餐价格")
     private BigDecimal price;
 
-    @Schema(description = "售卖状态 0:停售 1:起售")
+    @Schema(description = "售卖状态 0:停售 1:启售")
     private Integer status;
 
     @Schema(description = "描述信息")

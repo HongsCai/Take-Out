@@ -19,4 +19,11 @@ public interface SetmealDishService extends IService<SetmealDish> {
      * @return
      */
     List<Long> getSetmealIdsByDishId(Long dishId);
+
+    /**
+     * 根据套餐id查询菜品id
+     * @param setmealId
+     * @return
+     */
+    List<Long> getDishIdsBySetmealId(Long setmealId);
 }

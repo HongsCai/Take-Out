@@ -107,15 +107,15 @@ public class DishController {
     }
 
     /**
-     * 菜品起售停售
+     * 菜品启售停售
      * @param status
      * @param id
      * @return
      */
-    @Operation(summary = "菜品起售停售")
+    @Operation(summary = "菜品启售停售")
     @PostMapping("/status/{status}")
     public Result updateStatus(@PathVariable Integer status, Long id) {
-        log.info("菜品起售停售: {}, {}", status, id);
+        log.info("菜品启售停售: {}, {}", status, id);
         dishService.updateStatus(status, id);
         return Result.success();
     }

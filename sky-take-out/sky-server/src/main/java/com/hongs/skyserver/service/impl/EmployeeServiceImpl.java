@@ -189,7 +189,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
         String oldPasswordHash = DigestUtils.md5DigestAsHex(employeeEditPasswordDTO.getOldPassword().getBytes());
         if (!employee.getPassword().equals(oldPasswordHash)) {
-            throw new PasswordEditFailedException(MessageConstant.PASSWORD_ERROR);
+            throw new PasswordEditFailedException(MessageConstant.PASSWORD_EDIT_FAILED);
         }
 
         Employee updateEmployee = Employee.builder()

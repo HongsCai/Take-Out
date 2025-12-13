@@ -124,7 +124,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Override
     public List<Dish> listByCategoryId(Long categoryId) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Dish::getCategoryId, categoryId);
+        queryWrapper.eq(Dish::getCategoryId, categoryId)
+                .eq(Dish::getStatus, StatusConstant.ENABLE)
+                .orderByDesc(Dish::getUpdateTime);
         return this.list(queryWrapper);
     }
 
@@ -149,14 +151,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     }
 
     /**
-     * 菜品起售停售
+     * 菜品启售停售
      * @param status
      * @param id
      */
     @Override
     public void updateStatus(Integer status, Long id) {
         // 如果是停售操作，需要处理关联的套餐
-        if (StatusConstant.DISABLE.equals(status)) {
+        if (status.equals(StatusConstant.DISABLE)) {
             // 查询包含当前菜品的关联数据
             List<Long> setmealIds = setmealDishService.getSetmealIdsByDishId(id); // 需要在Service里补充这个方法
 

@@ -31,6 +31,20 @@ public class SetmealDishServiceImpl extends ServiceImpl<SetmealDishMapper, Setme
             return setmealDish.getSetmealId();
         }).toList();
     }
+
+    /**
+     * 根据套餐id查询菜品id
+     * @param setmealId
+     * @return
+     */
+    @Override
+    public List<Long> getDishIdsBySetmealId(Long setmealId) {
+        List<SetmealDish> setmealDishes = this.list(new LambdaQueryWrapper<SetmealDish>()
+                .eq(SetmealDish::getSetmealId, setmealId));
+        return setmealDishes.stream().map(setmealDish -> {
+            return setmealDish.getDishId();
+        }).toList();
+    }
 }
 
 

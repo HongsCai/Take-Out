@@ -43,7 +43,7 @@ public interface SetmealService extends IService<Setmeal> {
     void updateWithDish(SetmealSaveDTO setmealSaveDTO);
 
     /**
-     * 套餐起售停售
+     * 套餐启售停售
      * @param status
      * @param id
      */

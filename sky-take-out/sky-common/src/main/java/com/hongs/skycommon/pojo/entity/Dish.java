@@ -54,7 +54,7 @@ public class Dish implements Serializable {
     private String description;
 
     /**
-     * 0 停售 1 起售
+     * 0 停售 1 启售
      */
     private Integer status;
 

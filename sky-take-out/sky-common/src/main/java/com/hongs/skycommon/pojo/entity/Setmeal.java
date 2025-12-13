@@ -43,7 +43,7 @@ public class Setmeal implements Serializable {
     private BigDecimal price;
 
     /**
-     * 售卖状态 0:停售 1:起售
+     * 售卖状态 0:停售 1:启售
      */
     private Integer status;
 
