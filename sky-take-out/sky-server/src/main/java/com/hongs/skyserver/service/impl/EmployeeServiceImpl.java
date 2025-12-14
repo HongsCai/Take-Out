@@ -68,7 +68,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         }
 
         // 用户账号状态检测
-        if (employee.getStatus() == StatusConstant.DISABLE) {
+        if (employee.getStatus().equals(StatusConstant.DISABLE)) {
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
 
@@ -108,7 +108,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
                 .sex(employeeSaveDTO.getSex())
                 .idNumber(employeeSaveDTO.getIdNumber())
                 .phone(employeeSaveDTO.getPhone())
-                .status(StatusConstant.DISABLE)
+                .status(StatusConstant.ENABLE)
                 .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()))
                 .build();
         this.save(employee);
@@ -121,20 +121,20 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
      */
     @Override
     public PageResult<EmployeePageQueryVO> page(EmployeePageQueryDTO employeePageQueryDTO) {
-        IPage<Employee> iPage = new Page(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+        Page<Employee> page = new Page<>(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
         LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(employeePageQueryDTO.getName()), Employee::getName, employeePageQueryDTO.getName())
                 .orderByDesc(Employee::getUpdateTime)
                 .orderByDesc(Employee::getCreateTime);
-        this.page(iPage, wrapper);
+        this.page(page, wrapper);
 
-        List<EmployeePageQueryVO> employeePageQueryVOList = iPage.getRecords().stream().map(employee -> {
+        List<EmployeePageQueryVO> employeePageQueryVOList = page.getRecords().stream().map(employee -> {
             EmployeePageQueryVO employeePageQueryVO = new EmployeePageQueryVO();
             BeanUtils.copyProperties(employee, employeePageQueryVO);
             return employeePageQueryVO;
         }).toList();
 
-        return new PageResult<EmployeePageQueryVO>(iPage.getTotal(), employeePageQueryVOList);
+        return new PageResult<EmployeePageQueryVO>(page.getTotal(), employeePageQueryVOList);
     }
 
     /**

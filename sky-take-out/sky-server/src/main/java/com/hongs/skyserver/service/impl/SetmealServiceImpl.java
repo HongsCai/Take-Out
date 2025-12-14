@@ -25,7 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
 * @author Hongs
@@ -82,6 +86,10 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     @Override
     @Transactional
     public void deleteBatchByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+
         if (this.count(new LambdaQueryWrapper<Setmeal>()
                 .in(Setmeal::getId, ids)
                 .eq(Setmeal::getStatus, StatusConstant.ENABLE)) > 0) {
@@ -100,21 +108,49 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     @Override
     @Transactional
     public void updateWithDish(SetmealSaveDTO setmealSaveDTO) {
-        // 修改套餐表
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealSaveDTO, setmeal);
         this.updateById(setmeal);
 
-        // 删除套餐中的菜品数据
-        setmealDishService.remove(new LambdaQueryWrapper<SetmealDish>()
-                .eq(SetmealDish::getSetmealId, setmeal.getId()));
+        List<SetmealDish> dtoList = setmealSaveDTO.getSetmealDishes();
+        if (dtoList != null) {
+            dtoList.forEach(setmealDish -> {
+                setmealDish.setSetmealId(setmeal.getId());
+            });
+        } else {
+            dtoList = new ArrayList<>();
+        }
 
-        // 向套餐菜品表插入多条数据
-        List<SetmealDish> setmealDishList = setmealSaveDTO.getSetmealDishes();
+        List<SetmealDish> dbList = setmealDishService.list(
+                new LambdaQueryWrapper<SetmealDish>()
+                        .eq(SetmealDish::getSetmealId, setmeal.getId()));
 
-        if (setmealDishList != null && !setmealDishList.isEmpty()) {
-            setmealDishList.forEach(setmealDish -> setmealDish.setSetmealId(setmeal.getId()));
-            setmealDishService.saveBatch(setmealDishList);
+        Map<Long, SetmealDish> dtoMap = dtoList.stream()
+                .collect(Collectors.toMap(SetmealDish::getDishId, Function.identity(), (old, newOne) -> old));
+        Map<Long, SetmealDish> dbMap = dbList.stream()
+                .collect(Collectors.toMap(SetmealDish::getDishId, Function.identity(), (old, newOne) -> old));
+
+        List<Long> idsToRemove = dbList.stream()
+                .filter(dbSetmealDish -> !dtoMap.containsKey(dbSetmealDish.getDishId()))
+                .map(SetmealDish::getId).toList();
+        List<SetmealDish> entitiesToAdd = dtoList.stream()
+                .filter(setmealDish -> !dbMap.containsKey(setmealDish.getDishId()))
+                .toList();
+        List<SetmealDish> entitiesToUpdate = dtoList.stream()
+                .filter(setmealDish -> dbMap.containsKey(setmealDish.getDishId()))
+                .filter(setmealDish -> !dbMap.get(setmealDish.getDishId()).getCopies().equals(setmealDish.getCopies()))
+                .peek(setmealDish -> {
+                    setmealDish.setId(dbMap.get(setmealDish.getDishId()).getId());
+                }).toList();
+
+        if (!idsToRemove.isEmpty()) {
+            setmealDishService.removeByIds(idsToRemove);
+        }
+        if (!entitiesToUpdate.isEmpty()) {
+            setmealDishService.updateBatchById(entitiesToUpdate);
+        }
+        if (!entitiesToAdd.isEmpty()) {
+            setmealDishService.saveBatch(entitiesToAdd);
         }
     }
 
@@ -125,6 +161,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
      * @return
      */
     @Override
+    @Transactional
     public void updateStatus(Integer status, Long id) {
         // 判断当前是否要更改为启售
         if (status.equals(StatusConstant.ENABLE)) {

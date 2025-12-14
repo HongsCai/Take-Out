@@ -27,7 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
 * @author Hongs
@@ -86,6 +90,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Override
     @Transactional
     public void deleteBatchByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+
         // 判断当前菜品是否在售中
         if (this.count(new LambdaQueryWrapper<Dish>().in(Dish::getId, ids).eq(Dish::getStatus, StatusConstant.ENABLE)) > 0) {
             throw new BaseException(MessageConstant.DISH_ON_SALE);
@@ -140,13 +148,41 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishSaveDTO, dish);
         this.updateById(dish);
-        dishFlavorService.remove(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dishSaveDTO.getId()));
 
-        // 向口味表插入多条数据
-        List<DishFlavor> dishFlavors = dishSaveDTO.getFlavors();
-        if (dishFlavors != null && !dishFlavors.isEmpty()) {
-            dishFlavors.forEach(dishFlavor -> dishFlavor.setDishId(dish.getId()));
-            dishFlavorService.saveBatch(dishFlavors);
+        List<DishFlavor> dtoList = dishSaveDTO.getFlavors();
+        if (dtoList != null) {
+            dtoList.forEach(dto -> dto.setDishId(dish.getId()));
+        } else {
+            dtoList = new ArrayList<>();
+        }
+        List<DishFlavor> dbList = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>()
+                .eq(DishFlavor::getDishId, dish.getId()));
+        Map<String, DishFlavor> dtoMap = dtoList.stream()
+                .collect(Collectors.toMap(DishFlavor::getName, Function.identity(), (old, newOne) -> newOne));
+        Map<String, DishFlavor> dbMap = dbList.stream()
+                .collect(Collectors.toMap(DishFlavor::getName, Function.identity(), (old, newOne) -> newOne));
+
+        List<Long> idsToRemove = dbList.stream()
+                .filter(dishFlavor -> !dtoMap.containsKey(dishFlavor.getName()))
+                .map(DishFlavor::getId)
+                .toList();
+        List<DishFlavor> entitiesToAdd = dtoList.stream()
+                .filter(dishFlavor -> !dbMap.containsKey(dishFlavor.getName()))
+                .toList();
+        List<DishFlavor> entitiesToUpdate = dtoList.stream()
+                .filter(dishFlavor -> dbMap.containsKey(dishFlavor.getName()))
+                .filter(dishFlavor -> !dishFlavor.getValue().equals(dbMap.get(dishFlavor.getName()).getValue()))
+                .peek(dishFlavor -> dishFlavor.setId(dbMap.get(dishFlavor.getName()).getId()))
+                .toList();
+
+        if (!idsToRemove.isEmpty()) {
+            dishFlavorService.removeByIds(idsToRemove);
+        }
+        if (!entitiesToAdd.isEmpty()) {
+            dishFlavorService.saveBatch(entitiesToAdd);
+        }
+        if (!entitiesToUpdate.isEmpty()) {
+            dishFlavorService.updateBatchById(entitiesToUpdate);
         }
     }
 
@@ -156,6 +192,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      * @param id
      */
     @Override
+    @Transactional
     public void updateStatus(Integer status, Long id) {
         // 如果是停售操作，需要处理关联的套餐
         if (status.equals(StatusConstant.DISABLE)) {
