@@ -41,4 +41,13 @@
             </if>
         </where>
     </select>
+
+    <select id="getOneById" resultType="com.hongs.skycommon.pojo.vo.DishGetOneByIdVO">
+        select d.id, d.name, d.category_id, d.price, d.image, d.description,
+               d.status, d.update_time, c.name as category_name
+        from dish d
+        left join category c on d.category_id = c.id
+        where d.id = #{id}
+    </select>
+
 </mapper>

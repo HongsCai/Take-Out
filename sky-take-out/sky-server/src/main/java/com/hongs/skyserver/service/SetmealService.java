@@ -4,6 +4,7 @@ import com.hongs.skycommon.pojo.dto.SetmealPageQueryDTO;
 import com.hongs.skycommon.pojo.dto.SetmealSaveDTO;
 import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
 import com.hongs.skycommon.result.PageResult;
 
@@ -35,6 +36,13 @@ public interface SetmealService extends IService<Setmeal> {
      * @return
      */
     void deleteBatchByIds(List<Long> ids);
+
+    /**
+     * 根据id查询套餐
+     * @param id
+     * @return
+     */
+    SetmealGetOneByIdVO getOneById(Long id);
 
     /**
      * 修改套餐

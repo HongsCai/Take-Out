@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hongs.skycommon.pojo.dto.SetmealPageQueryDTO;
 import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
 
 import java.util.List;
@@ -23,6 +24,14 @@ public interface SetmealMapper extends BaseMapper<Setmeal> {
      * @return
      */
     Page<SetmealPageQueryVO> pageQuery(Page<SetmealPageQueryVO> page, SetmealPageQueryDTO setmealPageQueryDTO);
+
+
+    /**
+     * 根据id查询套餐
+     * @param id
+     * @return
+     */
+    SetmealGetOneByIdVO getOneById(Long id);
 
 }
 

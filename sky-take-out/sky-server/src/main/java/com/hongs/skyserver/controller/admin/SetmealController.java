@@ -2,6 +2,7 @@ package com.hongs.skyserver.controller.admin;
 
 import com.hongs.skycommon.pojo.dto.SetmealPageQueryDTO;
 import com.hongs.skycommon.pojo.dto.SetmealSaveDTO;
+import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
 import com.hongs.skycommon.result.PageResult;
 import com.hongs.skycommon.result.Result;
@@ -61,6 +62,14 @@ public class SetmealController {
         log.info("批量删除套餐: {}", ids);
         setmealService.deleteBatchByIds(ids);
         return Result.success();
+    }
+
+    @Operation(summary = "根据id查询套餐")
+    @GetMapping("/{id}")
+    public Result<SetmealGetOneByIdVO> getOneById(@PathVariable Long id) {
+        log.info("根据id查询套餐: {}", id);
+        SetmealGetOneByIdVO setmealGetOneByIdVO = setmealService.getOneById(id);
+        return Result.success(setmealGetOneByIdVO);
     }
 
     /**

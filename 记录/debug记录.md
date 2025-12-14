@@ -347,3 +347,130 @@ public interface DishMapper extends BaseMapper<Dish> {
 </select>
 ```
 
+
+
+# 2025年12月14日
+
+## Spring 循环依赖
+
+### 错误原因
+
+```
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The dependencies of some of the beans in the application context form a cycle:
+
+   dishController (field private com.hongs.skyserver.service.DishService com.hongs.skyserver.controller.admin.DishController.dishService)
+┌─────┐
+|  dishServiceImpl (field private com.hongs.skyserver.service.SetmealService com.hongs.skyserver.service.impl.DishServiceImpl.setmealService)
+↑     ↓
+|  setmealServiceImpl (field private com.hongs.skyserver.service.DishService com.hongs.skyserver.service.impl.SetmealServiceImpl.dishService)
+└─────┘
+```
+
+代码中出现了“我调用你，你调用我”的死锁情况：
+
+1. **DishServiceImpl** 中注入了 `SetmealService`（为了在停售菜品时，连带停售套餐）。
+2. **SetmealServiceImpl** 中注入了 `DishService`（为了在起售套餐时，检查包含的菜品是否在售）。
+
+Spring 在启动时，创建 `DishServiceImpl` 需要 `SetmealService`，而去创建 `SetmealService` 时又发现它需要 `DishServiceImpl`，于是就卡住报错了。
+
+
+
+### 解决方案
+
+这里有三种解决方法，推荐使用 **方法一** 或 **方法二**。
+
+#### 方法一：使用 `@Lazy` 注解（最简单，推荐）
+
+告诉 Spring：在注入这个依赖时，先不要立即创建它的实例，而是等真正调用它的时候再创建（懒加载）。
+
+你只需要在其中**任意一方**（或者两方都加）的 `@Autowired` 上加上 `@Lazy` 注解即可。
+
+**修改 `DishServiceImpl.java`：**
+
+```Java
+    @Autowired
+    private DishFlavorService dishFlavorService;
+
+    @Autowired
+    private SetmealDishService setmealDishService;
+
+    @Autowired
+    @Lazy // <--- 加上这个注解，打破循环
+    private SetmealService setmealService;
+```
+
+或者修改 `SetmealServiceImpl.java`：
+
+```Java
+    @Autowired
+    private SetmealDishService setmealDishService;
+
+    @Autowired
+    @Lazy // <--- 或者加在这里
+    private DishService dishService;
+```
+
+
+
+#### 方法二：注入 Mapper 而不是 Service（架构更干净）
+
+通常出现循环依赖，意味着 Service 层的职责耦合过重。如果只是为了简单的查询（比如 count），可以直接注入 Mapper，避免 Service 之间的相互依赖。
+
+针对 SetmealServiceImpl：
+
+注入 DishService 主要是为了检查菜品状态（count 操作）。
+
+可以改为注入 DishMapper。
+
+```java
+public class SetmealServiceImpl ... {
+    
+    // 删除这个
+    // @Autowired
+    // private DishService dishService;
+
+    // 改为注入 Mapper
+    @Autowired
+    private DishMapper dishMapper; 
+
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        if (status.equals(StatusConstant.ENABLE)) {
+            // ...
+            // 原代码：Long count = dishService.count(...)
+            // 新代码：直接用 Mapper 查询
+            Long count = dishMapper.selectCount(new LambdaQueryWrapper<Dish>()
+                    .in(Dish::getId, dishIdList)
+                    .eq(Dish::getStatus, StatusConstant.DISABLE));
+            
+            if (count > 0) {
+                 throw new SetMealEnableFailedException(...);
+            }
+        }
+        // ...
+    }
+}
+```
+
+这样 `SetmealService` 就不依赖 `DishService` 了，环就被打破了。
+
+
+
+#### 方法三：修改配置文件（不推荐）
+
+Spring Boot 默认禁止循环依赖。你可以强制开启允许循环依赖，但这只是掩盖问题，不是解决问题。
+
+在 `application.yml` 或 `application.properties` 中添加：
+
+```yaml
+spring:
+  main:
+    allow-circular-references: true
+```
+

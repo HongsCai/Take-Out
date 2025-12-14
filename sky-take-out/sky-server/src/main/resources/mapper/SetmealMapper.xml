@@ -27,7 +27,7 @@
         select s.id, s.category_id, s.name, s.price, s.status, s.description,
         s.image, s.update_time, c.name as category_name
         from setmeal s
-        left join category c on s.category_id = c.id
+            left join category c on s.category_id = c.id
         <where>
             <if test="setmealPageQueryDTO.categoryId.name != null and setmealPageQueryDTO.categoryId.name != ''">
                 and s.name like concat('%', #{setmealPageQueryDTO.categoryId.name}, '%')
@@ -39,5 +39,13 @@
                 and s.status = #{setmealPageQueryDTO.status}
             </if>
         </where>
+    </select>
+
+    <select id="getOneById" resultType="com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO">
+        select s.id, s.category_id, s.name, s.price, s.status, s.description,
+               s.image, s.update_time, c.name as category_name
+        from setmeal s
+            left join category c on s.category_id = c.id
+        where s.id = #{id}
     </select>
 </mapper>

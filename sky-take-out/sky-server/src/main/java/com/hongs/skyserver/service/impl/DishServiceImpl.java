@@ -118,8 +118,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
     @Override
     @Transactional
     public DishGetOneByIdVO getOneById(Long id) {
-        DishGetOneByIdVO dishGetOneByIdVO = new DishGetOneByIdVO();
-        BeanUtils.copyProperties(this.getById(id), dishGetOneByIdVO);
+        DishGetOneByIdVO dishGetOneByIdVO = this.baseMapper.getOneById(id);
+        if (dishGetOneByIdVO == null) {
+            return null;
+        }
         dishGetOneByIdVO.setFlavors(dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, id)));
         return dishGetOneByIdVO;
     }

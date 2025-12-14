@@ -1,6 +1,4 @@
 package com.hongs.skyserver.service.impl;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,12 +12,13 @@ import com.hongs.skycommon.pojo.dto.SetmealSaveDTO;
 import com.hongs.skycommon.pojo.entity.Dish;
 import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.hongs.skycommon.pojo.entity.SetmealDish;
+import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
 import com.hongs.skycommon.result.PageResult;
-import com.hongs.skyserver.service.DishService;
+import com.hongs.skyserver.mapper.DishMapper;
+import com.hongs.skyserver.mapper.SetmealMapper;
 import com.hongs.skyserver.service.SetmealDishService;
 import com.hongs.skyserver.service.SetmealService;
-import com.hongs.skyserver.mapper.SetmealMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
     private SetmealDishService setmealDishService;
 
     @Autowired
-    private DishService dishService;
+    private DishMapper dishMapper;
 
     /**
      * 新增套餐
@@ -98,6 +97,24 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
         setmealDishService.remove(new LambdaQueryWrapper<SetmealDish>()
                 .in(SetmealDish::getSetmealId, ids));
         this.removeByIds(ids);
+    }
+
+    /**
+     * 根据id查询套餐
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional
+    public SetmealGetOneByIdVO getOneById(Long id) {
+        SetmealGetOneByIdVO setmealGetOneByIdVO = this.baseMapper.getOneById(id);
+        if (setmealGetOneByIdVO == null) {
+            return null;
+        }
+        setmealGetOneByIdVO.setSetmealDishes(setmealDishService
+                .list(new LambdaQueryWrapper<SetmealDish>()
+                .eq(SetmealDish::getSetmealId, id)));
+        return setmealGetOneByIdVO;
     }
 
     /**
@@ -168,7 +185,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
             // 查询当前套餐的菜品数据
             List<Long> dishIdList = setmealDishService.getDishIdsBySetmealId(id);
             if (dishIdList != null && !dishIdList.isEmpty()) {
-                Long count = dishService.count(new LambdaQueryWrapper<Dish>()
+                Long count = dishMapper.selectCount(new LambdaQueryWrapper<Dish>()
                         .in(Dish::getId, dishIdList)
                         .eq(Dish::getStatus, StatusConstant.DISABLE));
                 // 如果存在停售的菜品，则抛出异常

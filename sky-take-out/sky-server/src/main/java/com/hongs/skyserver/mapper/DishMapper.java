@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hongs.skycommon.pojo.dto.DishPageQueryDTO;
 import com.hongs.skycommon.pojo.entity.Dish;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hongs.skycommon.pojo.vo.DishGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.DishPageQueryVO;
 
 
@@ -22,6 +23,13 @@ public interface DishMapper extends BaseMapper<Dish> {
      * @return
      */
     Page<DishPageQueryVO> pageQuery(Page<DishPageQueryVO> page, DishPageQueryDTO dishPageQueryDTO);
+
+    /**
+     * 根据id查询菜品
+     * @param id
+     * @return
+     */
+    DishGetOneByIdVO getOneById(Long id);
 
 }
 
