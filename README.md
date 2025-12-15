@@ -16,6 +16,8 @@
 | 组件/依赖 (Component) | 版本 (Version) |
 | :--- | :--- |
 | JDK | 17 |
+| MySQL | 8.0.4.4|
+| Redis | 8.4.0|
 | SpringBoot3 | 3.2.12 |
 | Knife4j-openapi3 | 4.5.0 |
 | Mybatis-Plus | 3.5.14 |
