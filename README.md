@@ -1,6 +1,5 @@
-> `nginx-1.20.2` 前端
->
-> `sky-take-out` 后端
+- [ ] `nginx-1.20.2` 前端 【先采用现有前端】
+- [ ] `sky-take-out` 后端 【练手ing】
 
 
 

@@ -16,6 +16,11 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
+  data:
+    redis:
+      host: ${hongs.redis.host}
+      port: ${hongs.redis.port}
+      password: ${hongs.redis.password}
 
 springdoc:
   api-docs:
@@ -41,11 +46,11 @@ logging:
 sky:
   jwt:
     # 设置jwt签名加密时使用的秘钥
-    admin-secret-key: hongs
+    admin-secret-key: ${hongs.jwt.admin-secret-key}
     # 设置jwt过期时间
-    admin-ttl: 720000000
+    admin-ttl: ${hongs.jwt.admin-ttl}
     # 设置前端传递过来的令牌名称
-    admin-token-name: token
+    admin-token-name: ${hongs.jwt.admin-token-name}
 
   alioss:
     access-key-id: ${hongs.alioss.access-key-id}

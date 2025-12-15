@@ -6,9 +6,20 @@ hongs:
     host: localhost
     port: 3306
     database: sky_take_out
+
   alioss:
     endpoint: oss-cn-beijing.aliyuncs.com
     access-key-id: ${OSS_ACCESS_KEY_ID}
     access-key-secret: ${OSS_ACCESS_KEY_SECRET}
     bucket-name: hongs-cai-java-sky-take-out
     region: cn-beijing
+
+  redis:
+    host: localhost
+    port: 6379
+    password: ~
+
+  jwt:
+    admin-secret-key: hongs
+    admin-ttl: 720000000
+    admin-token-name: token
