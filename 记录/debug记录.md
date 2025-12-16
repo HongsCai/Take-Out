@@ -474,3 +474,79 @@ spring:
     allow-circular-references: true
 ```
 
+
+
+# 2025年12月16日
+
+## Redis 序列化配置与类型转换异常
+
+### 核心问题现象
+
+在使用 `RedisTemplate<Object, Object>` 配置 JSON 序列化（如 `Jackson2JsonRedisSerializer`）处理 Value 时，从 Redis 读取数据并强制转换为具体业务对象（如 `User`）时，常抛出以下异常：
+
+> ```
+> java.lang.ClassCastException: java.util.LinkedHashMap cannot be cast to com.sky.entity.User
+> ```
+
+### 异常产生原因
+
+- **存储阶段**：当使用普通 JSON 序列化器时，Java 对象被转换为纯 JSON 字符串（例如 `{"id":1, "name":"test"}`），其中**不包含**原对象的类信息（Class Type）。
+- **读取阶段**：反序列化器读取到 JSON 数据。由于不知道目标类是 `User` 还是 `Order`，Jackson 默认将其解析为通用的键值对集合 **`LinkedHashMap`**。
+- **转换阶段**：代码试图将 `LinkedHashMap` 强转为 `User`，导致类型转换失败。
+
+### 三种配置策略对比
+
+#### 策略 A：混合模式（Key 字符串化，Value 保持默认）
+
+这是为了规避类型转换异常的一种折中配置。
+
+- **配置方式**：
+  - Key：`StringRedisSerializer`
+  - Value：**默认（JDK 序列化）**
+- **原理**：JDK 序列化会在二进制流中写入完整的类路径（如 `com.sky.entity.User`）。
+- **优点**：
+  - Key 可读，方便调试。
+  - **类型安全**：反序列化时 JVM 知道确切的类类型，强转绝对安全，不会报 `ClassCastException`。
+- **缺点**：
+  - Redis 中的 Value 是二进制乱码，不可读。
+  - 数据体积较大，且必须实现 `Serializable` 接口。
+
+#### 策略 B：智能 JSON 模式（自动携带类型）
+
+- **配置方式**：Value 使用 **`GenericJackson2JsonRedisSerializer`**。
+
+- **原理**：在存入 JSON 时，自动添加一个 `"@class"` 字段记录类名。
+
+  ```json
+  {
+    "@class": "com.sky.entity.User",
+    "id": 1, 
+    "name": "test"
+  }
+  ```
+  
+- **优点**：数据可读，且自动处理类型转换。
+
+- **缺点**：如果不小心修改了包名或类名，旧缓存反序列化会报错；由于多存了类名，体积略有增加。
+
+#### 策略 C：全手动模式（推荐生产环境使用）
+
+- **配置方式**：直接使用 **`StringRedisTemplate`**。
+
+- **原理**：Redis 只负责存字符串，序列化逻辑由业务代码控制。
+
+- **代码示例**：
+
+  ```java
+  // 存
+  stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(user));
+  // 取
+  String json = stringRedisTemplate.opsForValue().get(key);
+  User user = JSON.parseObject(json, User.class); // 手动指定类型
+  ```
+  
+- **优点**：**完全可控**，彻底杜绝类型转换异常，跨语言兼容性最好。
+
+### 总结
+
+“只配置 Key 序列化，不配置 Value 序列化”的做法，本质上是利用 **JDK 原生序列化携带类信息** 的特性，以牺牲 Redis 中数据的可读性为代价，来换取 Java 代码中类型转换的稳定性（避免 `ClassCastException`）。
