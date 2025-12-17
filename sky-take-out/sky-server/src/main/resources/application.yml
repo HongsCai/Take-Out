@@ -25,7 +25,13 @@ spring:
 springdoc:
   api-docs:
     enabled: true
-  packages-to-scan: com.hongs.skyserver.controller
+  group-configs:
+    - group: 管理端接口
+      paths-to-match: /admin/**
+      packages-to-scan: com.hongs.skyserver.controller.admin
+    - group: 用户端接口
+      paths-to-match: /user/**
+      packages-to-scan: com.hongs.skyserver.controller.user
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/*.xml

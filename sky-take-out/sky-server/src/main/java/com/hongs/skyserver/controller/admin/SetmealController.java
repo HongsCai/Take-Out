@@ -8,6 +8,7 @@ import com.hongs.skycommon.result.PageResult;
 import com.hongs.skycommon.result.Result;
 import com.hongs.skyserver.service.SetmealService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/admin/setmeal")
+@Tag(name = "套餐相关接口")
 public class SetmealController {
 
     @Autowired
@@ -31,6 +33,7 @@ public class SetmealController {
      * @param setmealSaveDTO
      * @return
      */
+    @Operation(summary = "新增套餐")
     @PostMapping
     public Result save(@RequestBody SetmealSaveDTO setmealSaveDTO) {
         log.info("新增套餐: {}", setmealSaveDTO);

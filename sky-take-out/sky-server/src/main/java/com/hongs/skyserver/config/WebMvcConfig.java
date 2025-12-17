@@ -49,7 +49,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         return new OpenAPI()
                 .info(new Info()
                         .title("苍穹外卖项目接口文档")
-                        .version("2.0")
+                        .version("1.5")
                         .description("苍穹外卖项目接口文档"));
     }
 
