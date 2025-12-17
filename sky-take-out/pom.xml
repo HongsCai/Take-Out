@@ -28,15 +28,13 @@
         <mybatis-plus-spring>3.5.14</mybatis-plus-spring>
         <mysql-connector-java>8.0.30</mysql-connector-java>
         <druid-spring-boot-starter>1.2.23</druid-spring-boot-starter>
-        <fastjson>1.2.76</fastjson>
-        <commons.lang>2.6</commons.lang>
         <knife4j>4.5.0</knife4j>
         <jjwt>0.9.1</jjwt>
         <jaxb-api>2.3.1</jaxb-api>
         <aliyun-sdk-oss>3.17.4</aliyun-sdk-oss>
         <activation>1.1.1</activation>
         <jaxb-runtime>2.3.3</jaxb-runtime>
-        <poi>3.16</poi>
+
     </properties>
 
     <dependencyManagement>
@@ -69,12 +67,6 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-starter</artifactId>
                 <version>${druid-spring-boot-starter}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson}</version>
             </dependency>
 
             <dependency>
@@ -111,19 +103,6 @@
                 <artifactId>jaxb-runtime</artifactId>
                 <version>${jaxb-runtime}</version>
             </dependency>
-
-            <!-- poi -->
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi</artifactId>
-                <version>${poi}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${poi}</version>
-            </dependency>
-
 
         </dependencies>
     </dependencyManagement>

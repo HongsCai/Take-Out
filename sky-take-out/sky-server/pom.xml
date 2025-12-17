@@ -89,16 +89,6 @@
             <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
         </dependency>
 
-<!--        &lt;!&ndash; poi &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.poi</groupId>-->
-<!--            <artifactId>poi</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.poi</groupId>-->
-<!--            <artifactId>poi-ooxml</artifactId>-->
-<!--        </dependency>-->
-
     </dependencies>
 
     <build>
