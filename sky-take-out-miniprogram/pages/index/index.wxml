@@ -2,6 +2,10 @@
 <navigation-bar title="Weixin" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <scroll-view class="scrollarea" scroll-y type="list">
   <view class="container">
-    Hongs_Cai
+    <view>{{ msg }}</view>
+    <view>
+      <button type="primary" bind:tap="getUserInfo">获取用户信息</button>
+    </view>
+    
   </view>
 </scroll-view>
