@@ -1,5 +1,6 @@
 package com.hongs.skycommon.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hongs.skycommon.json.JacksonObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -34,17 +35,23 @@ public class HttpClientUtil {
                 .build();
     }
 
-    public static String doGet(String url, Map<String, String> params) {
+    public static String doGet(String url, Map<String, Object> params) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        String result = "";
         CloseableHttpResponse response = null;
+        String result = "";
+
         try {
             URIBuilder uriBuilder = new URIBuilder(url);
             if (params != null) {
-                params.forEach(uriBuilder::addParameter);
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    if (entry.getValue() != null) {
+                        uriBuilder.addParameter(entry.getKey(), String.valueOf(entry.getValue()));
+                    }
+                }
             }
             URI uri = uriBuilder.build();
             HttpGet httpGet = new HttpGet(uri);
+            httpGet.setConfig(builderRequestConfig());
             response = httpClient.execute(httpGet);
             if (response.getStatusLine().getStatusCode() == 200) {
                 result = EntityUtils.toString(response.getEntity(), CHARSET);
@@ -57,7 +64,7 @@ public class HttpClientUtil {
         return result;
     }
 
-    public static String doPost(String url, Map<String, String> params) {
+    public static String doPost(String url, Map<String, Object> params) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
         String result = "";
@@ -65,8 +72,9 @@ public class HttpClientUtil {
         try {
             HttpPost httpPost = new HttpPost(url);
             if (params != null) {
-                List<NameValuePair> nameValuePairs = params.entrySet().stream().map(
-                        entry -> new BasicNameValuePair(entry.getKey(), entry.getValue())
+                List<NameValuePair> nameValuePairs = params.entrySet().stream()
+                        .filter(entry -> entry.getValue() != null)
+                        .map(entry -> new BasicNameValuePair(entry.getKey(), String.valueOf(entry.getValue()))
                 ).collect(Collectors.toList());
                 UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nameValuePairs, CHARSET);
                 httpPost.setEntity(entity);
@@ -84,10 +92,11 @@ public class HttpClientUtil {
         return result;
     }
 
-    public static String doPostJson(String url, Map<String, String> params) {
+    public static String doPostJson(String url, Map<String, Object> params) {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
         String result = "";
+
         try {
             HttpPost httpPost = new HttpPost(url);
             if (params != null) {
@@ -122,5 +131,15 @@ public class HttpClientUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Map<String, Object> jsonToMap(String json) {
+        Map<String, Object> result = null;
+        try {
+             result = objectMapper.readValue(json, Map.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 }

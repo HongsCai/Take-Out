@@ -51,12 +51,12 @@ logging:
 
 sky:
   jwt:
-    # 设置jwt签名加密时使用的秘钥
     admin-secret-key: ${hongs.jwt.admin-secret-key}
-    # 设置jwt过期时间
     admin-ttl: ${hongs.jwt.admin-ttl}
-    # 设置前端传递过来的令牌名称
     admin-token-name: ${hongs.jwt.admin-token-name}
+    user-secret-key: ${hongs.jwt.user-secret-key}
+    user-ttl: ${hongs.jwt.user-ttl}
+    user-token-name: ${hongs.jwt.user-token-name}
 
   alioss:
     access-key-id: ${hongs.alioss.access-key-id}
@@ -64,3 +64,7 @@ sky:
     endpoint: ${hongs.alioss.endpoint}
     bucket-name: ${hongs.alioss.bucket-name}
     region: ${hongs.alioss.region}
+
+  wechat:
+    app-id: ${hongs.wechat.app-id}
+    app-secret: ${hongs.wechat.app-secret}

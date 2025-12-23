@@ -21,5 +21,12 @@ hongs:
 
   jwt:
     admin-secret-key: hongs
-    admin-ttl: 720000000
+    admin-ttl: 7200000
     admin-token-name: token
+    user-secret-key: hongs
+    user-ttl: 7200000
+    user-token-name: user_token
+
+  wechat:
+    app-id: ${WECHAT_APP_ID}}
+    app-secret: ${WECHAT_APP_SECRET}
