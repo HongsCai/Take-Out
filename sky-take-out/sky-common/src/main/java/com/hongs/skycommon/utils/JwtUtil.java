@@ -21,6 +21,7 @@ public class JwtUtil {
      * @return
      */
     public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
+
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
         long expMillis = System.currentTimeMillis() + ttlMillis;

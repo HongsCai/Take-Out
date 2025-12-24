@@ -18,7 +18,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
  */
 @Component
 @Slf4j
-public class JwtTokenAdminInterceptor implements HandlerInterceptor {
+public class JwtTokenUserInterceptor implements HandlerInterceptor {
+
     @Autowired
     private JwtProperties jwtProperties;
 
@@ -35,21 +36,18 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
 
-        // 判断当前拦截到的是Controller的方法还是其他资源
         if (!(handler instanceof HandlerMethod)) {
-            // 当前拦截到的不是动态方法，直接放行
             return true;
         }
 
-        String token = request.getHeader(jwtProperties.getAdminTokenName());
+        String jwt = request.getHeader(jwtProperties.getUserTokenName());
 
         try {
-            log.info("Admin Jwt令牌校验: {}", token);
-            Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
-            Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
-            log.info("当前员工ID: {}", empId);
-            BaseContext.setCurrentId(empId);
-
+            log.info("User Jwt令牌校验: {}", jwt);
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getUserSecretKey(), jwt);
+            Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
+            log.info("当前用户ID: {}", userId);
+            BaseContext.setCurrentId(userId);
             return true;
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hongs.skycommon.constant.JwtClaimsConstant;
+import com.hongs.skycommon.constant.MessageConstant;
+import com.hongs.skycommon.exception.LoginFailedException;
+import com.hongs.skycommon.exception.UserNotLoginException;
 import com.hongs.skycommon.json.JacksonObjectMapper;
 import com.hongs.skycommon.pojo.dto.UserLoginDTO;
 import com.hongs.skycommon.pojo.entity.User;
@@ -44,12 +47,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public UserLoginVO login(UserLoginDTO userLoginDTO) {
         Map<String, Object> param = Map.of("appid", wechatProperties.getAppId(),
                 "secret", wechatProperties.getAppSecret(),
-                "code", userLoginDTO.getCode()
+                "js_code", userLoginDTO.getCode(),
+                "grant_type", "authorization_code"
         );
         String url = "https://api.weixin.qq.com/sns/jscode2session";
         String json = HttpClientUtil.doGet(url, param);
         Map<String, Object> map = HttpClientUtil.jsonToMap(json);
         String openId = (String) map.get("openid");
+
+        if (openId == null) {
+            throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
+        }
 
         User user = this.getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getOpenid, openId));

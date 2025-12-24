@@ -550,3 +550,87 @@ spring:
 ### 总结
 
 “只配置 Key 序列化，不配置 Value 序列化”的做法，本质上是利用 **JDK 原生序列化携带类信息** 的特性，以牺牲 Redis 中数据的可读性为代价，来换取 Java 代码中类型转换的稳定性（避免 `ClassCastException`）。
+
+
+
+# 2025年12月23日
+
+## 属性部分导致的自动填充失效
+
+### 问题描述
+
+```java
+@Slf4j
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        log.info("开始插入填充...");
+        this.strictInsertFill(metaObject, AutoFillConstant.CREATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, AutoFillConstant.CREATE_USER, Long.class, BaseContext.getCurrentId());
+        this.strictInsertFill(metaObject, AutoFillConstant.UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        this.strictInsertFill(metaObject, AutoFillConstant.UPDATE_USER, Long.class, BaseContext.getCurrentId());
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        log.info("开始更新填充...");
+        this.strictUpdateFill(metaObject, AutoFillConstant.UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        this.strictUpdateFill(metaObject, AutoFillConstant.UPDATE_USER, Long.class, BaseContext.getCurrentId());
+    }
+}
+```
+
+有 `CreateTime` `UpdateTime` `CreateUser` `UpdateUser` 这四种属性的 `set` 方法时，才会触发自动填充的 `insertFill`；同理，有 `UpdateTime` ` UpdateUser` 这两种属性的 `set` 方法才会触发自动填充的 `updateFill`。
+
+
+
+### 改进方法
+
+```java
+@Slf4j
+@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        log.info("开始插入填充...");
+
+        // 1. 填充 createTime (User实体有这个字段，会执行)
+        if (metaObject.hasSetter(AutoFillConstant.CREATE_TIME)) {
+            this.strictInsertFill(metaObject, AutoFillConstant.CREATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        }
+
+        // 2. 填充 createUser (User实体没有这个字段，hasSetter返回false，跳过，不会报错)
+        if (metaObject.hasSetter(AutoFillConstant.CREATE_USER)) {
+            this.strictInsertFill(metaObject, AutoFillConstant.CREATE_USER, Long.class, BaseContext.getCurrentId());
+        }
+
+        // 3. 填充 updateTime
+        if (metaObject.hasSetter(AutoFillConstant.UPDATE_TIME)) {
+            this.strictInsertFill(metaObject, AutoFillConstant.UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        }
+
+        // 4. 填充 updateUser
+        if (metaObject.hasSetter(AutoFillConstant.UPDATE_USER)) {
+            this.strictInsertFill(metaObject, AutoFillConstant.UPDATE_USER, Long.class, BaseContext.getCurrentId());
+        }
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        log.info("开始更新填充...");
+
+        if (metaObject.hasSetter(AutoFillConstant.UPDATE_TIME)) {
+            this.strictUpdateFill(metaObject, AutoFillConstant.UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        }
+
+        if (metaObject.hasSetter(AutoFillConstant.UPDATE_USER)) {
+            this.strictUpdateFill(metaObject, AutoFillConstant.UPDATE_USER, Long.class, BaseContext.getCurrentId());
+        }
+    }
+}
+```
+
+这样的同一个 Handler 就可以同时兼容“全字段实体（如员工表）”和“少字段实体（如用户表）”。
