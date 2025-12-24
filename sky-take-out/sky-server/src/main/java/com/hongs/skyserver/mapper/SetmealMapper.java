@@ -6,6 +6,7 @@ import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
+import com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO;
 
 import java.util.List;
 

@@ -25,7 +25,7 @@ hongs:
     admin-token-name: token
     user-secret-key: hongs
     user-ttl: 7200000
-    user-token-name: user_token
+    user-token-name: authentication
 
   wechat:
     app-id: ${WECHAT_APP_ID}

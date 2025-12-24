@@ -2,6 +2,7 @@ package com.hongs.skyserver.service;
 
 import com.hongs.skycommon.pojo.entity.SetmealDish;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO;
 
 import java.util.List;
 
@@ -26,4 +27,11 @@ public interface SetmealDishService extends IService<SetmealDish> {
      * @return
      */
     List<Long> getDishIdsBySetmealId(Long setmealId);
+
+    /**
+     * 根据套餐id查询包含的菜品
+     * @param id
+     * @return
+     */
+    List<SetmealWithDishGetByIdVO> getWithDishById(Long id);
 }

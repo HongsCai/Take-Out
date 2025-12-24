@@ -68,11 +68,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = JwtUtil.createJWT(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
-        UserLoginVO userLoginVO = new UserLoginVO();
-        userLoginVO.setId(user.getId());
-        userLoginVO.setOpenid(user.getOpenid());
-        userLoginVO.setToken(token);
-        return userLoginVO;
+        return UserLoginVO.builder()
+                .id(user.getId())
+                .openid(user.getOpenid())
+                .token(token)
+                .build();
     }
 }
 

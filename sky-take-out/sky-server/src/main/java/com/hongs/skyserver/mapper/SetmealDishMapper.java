@@ -2,6 +2,9 @@ package com.hongs.skyserver.mapper;
 
 import com.hongs.skycommon.pojo.entity.SetmealDish;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO;
+
+import java.util.List;
 
 /**
 * @author Hongs
@@ -11,6 +14,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface SetmealDishMapper extends BaseMapper<SetmealDish> {
 
+    /**
+     * 根据套餐id查询包含的菜品
+     * @param id
+     * @return
+     */
+    List<SetmealWithDishGetByIdVO> getWithDishById(Long id);
 }
 
 

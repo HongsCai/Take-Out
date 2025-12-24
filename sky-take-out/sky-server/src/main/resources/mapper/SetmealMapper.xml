@@ -48,4 +48,5 @@
             left join category c on s.category_id = c.id
         where s.id = #{id}
     </select>
+    
 </mapper>

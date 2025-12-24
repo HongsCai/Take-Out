@@ -6,6 +6,7 @@ import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
+import com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO;
 import com.hongs.skycommon.result.PageResult;
 
 import java.util.List;
@@ -56,4 +57,19 @@ public interface SetmealService extends IService<Setmeal> {
      * @param id
      */
     void updateStatus(Integer status, Long id);
+
+
+    /**
+     * 根据分类id查询套餐
+     * @param categoryId
+     * @return
+     */
+    List<Setmeal> listByCategoryId(Long categoryId);
+
+    /**
+     * 根据套餐id查询包含的菜品
+     * @param id
+     * @return
+     */
+    List<SetmealWithDishGetByIdVO> getWithDishById(Long id);
 }

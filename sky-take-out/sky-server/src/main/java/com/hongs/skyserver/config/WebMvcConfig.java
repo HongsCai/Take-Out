@@ -3,6 +3,7 @@ package com.hongs.skyserver.config;
 
 import com.hongs.skycommon.json.JacksonObjectMapper;
 import com.hongs.skyserver.interceptor.JwtTokenAdminInterceptor;
+import com.hongs.skyserver.interceptor.JwtTokenUserInterceptor;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     @Autowired
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
+    @Autowired
+    private JwtTokenUserInterceptor jwtTokenUserInterceptor;
 
     /**
      * 注册自定义拦截器
@@ -38,7 +41,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
                 .addPathPatterns("/admin/**")
                 .excludePathPatterns("/admin/employee/login");
 
-        registry.addInterceptor(jwtTokenAdminInterceptor)
+        registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/user/**")
                 .excludePathPatterns("/user/user/login")
                 .excludePathPatterns("/user/shop/status");

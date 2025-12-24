@@ -14,6 +14,7 @@ import com.hongs.skycommon.pojo.entity.Setmeal;
 import com.hongs.skycommon.pojo.entity.SetmealDish;
 import com.hongs.skycommon.pojo.vo.SetmealGetOneByIdVO;
 import com.hongs.skycommon.pojo.vo.SetmealPageQueryVO;
+import com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO;
 import com.hongs.skycommon.result.PageResult;
 import com.hongs.skyserver.mapper.DishMapper;
 import com.hongs.skyserver.mapper.SetmealMapper;
@@ -200,5 +201,27 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
                 .status(status)
                 .build();
         this.updateById(setmeal);
+    }
+
+    /**
+     * 根据分类id查询套餐
+     * @param categoryId
+     * @return
+     */
+    @Override
+    public List<Setmeal> listByCategoryId(Long categoryId) {
+        return this.list(new LambdaQueryWrapper<Setmeal>()
+                .eq(Setmeal::getCategoryId, categoryId)
+                .eq(Setmeal::getStatus, StatusConstant.ENABLE));
+    }
+
+    /**
+     * 根据id查询套餐和菜品
+     * @param id
+     * @return
+     */
+    @Override
+    public List<SetmealWithDishGetByIdVO> getWithDishById(Long id) {
+        return setmealDishService.getWithDishById(id);
     }
 }

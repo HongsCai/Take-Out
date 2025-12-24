@@ -16,4 +16,12 @@
     <sql id="Base_Column_List">
         id,setmeal_id,dish_id,name,price,copies
     </sql>
+
+    <select id="getWithDishById" resultType="com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO">
+        select sd.copies, d.description, d.image, d.name
+        from setmeal_dish
+        left join dish d on sd.dish_id = d.id
+        where sd.setmeal_id = #{id}
+    </select>
+
 </mapper>

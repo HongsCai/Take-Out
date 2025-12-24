@@ -3,6 +3,7 @@ package com.hongs.skyserver.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hongs.skycommon.pojo.entity.SetmealDish;
+import com.hongs.skycommon.pojo.vo.SetmealWithDishGetByIdVO;
 import com.hongs.skyserver.service.SetmealDishService;
 import com.hongs.skyserver.mapper.SetmealDishMapper;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,11 @@ public class SetmealDishServiceImpl extends ServiceImpl<SetmealDishMapper, Setme
         return setmealDishes.stream().map(setmealDish -> {
             return setmealDish.getDishId();
         }).toList();
+    }
+
+    @Override
+    public List<SetmealWithDishGetByIdVO> getWithDishById(Long id) {
+        return this.baseMapper.getWithDishById(id);
     }
 }
 
