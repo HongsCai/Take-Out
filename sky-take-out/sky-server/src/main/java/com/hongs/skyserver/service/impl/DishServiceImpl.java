@@ -133,11 +133,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Override
     public List<Dish> listByCategoryId(Long categoryId) {
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Dish::getCategoryId, categoryId)
-                .eq(Dish::getStatus, StatusConstant.ENABLE)
-                .orderByDesc(Dish::getUpdateTime);
-        return this.list(queryWrapper);
+        return this.list(new LambdaQueryWrapper<Dish>()
+                .eq(Dish::getCategoryId, categoryId)
+                .eq(Dish::getStatus, StatusConstant.ENABLE));
     }
 
     /**
@@ -217,6 +215,23 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
                 .status(status)
                 .build();
         this.updateById(dish);
+    }
+
+    /**
+     * 根据分类ID查询菜品及口味
+     * @param id
+     * @return
+     */
+    @Override
+    public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long id) {
+        return this.listByCategoryId(id).stream()
+                .map(dish -> {
+                    DishGetOneByIdVO dishGetOneByIdVO = new DishGetOneByIdVO();
+                    BeanUtils.copyProperties(dish, dishGetOneByIdVO);
+                    dishGetOneByIdVO.setFlavors(dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>()
+                            .eq(DishFlavor::getDishId, dish.getId())));
+                    return dishGetOneByIdVO;
+                }).toList();
     }
 }
 

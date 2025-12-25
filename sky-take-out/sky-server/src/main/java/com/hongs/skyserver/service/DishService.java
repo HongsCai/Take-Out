@@ -62,4 +62,11 @@ public interface DishService extends IService<Dish> {
      * @param id
      */
     void updateStatus(Integer status, Long id);
+
+    /**
+     * 根据分类ID查询菜品及口味
+     * @param id
+     * @return
+     */
+    List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long id);
 }
