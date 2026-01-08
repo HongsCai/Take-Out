@@ -133,7 +133,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
         // 2. 需要为消息转换器设置一个对象转换器，对象转换器可以将 Java 对象序列化为 JSON 数据
-        converter.setObjectMapper(new JacksonObjectMapper());
+        converter.setObjectMapper(objectMapper);
 
         // 3. 将自己的消息转换器加入到容器中
         converters.add(0, converter);
@@ -634,3 +634,439 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 ```
 
 这样的同一个 Handler 就可以同时兼容“全字段实体（如员工表）”和“少字段实体（如用户表）”。
+
+
+
+# 2026年1月3日
+
+## SpringCache全部失效
+
+### 问题
+
+Cache失效
+
+```java
+/**
+* @author Hongs
+* @description 针对表【category(菜品及套餐分类)】的数据库操作Service实现
+* @createDate 2025-12-08 12:12:19
+*/
+@Service
+public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
+    implements CategoryService {
+
+    @Autowired
+    private DishMapper dishMapper;
+
+    @Autowired
+    private SetmealMapper setmealMapper;
+
+    /**
+     * 新增分类
+     * @param categorySaveDTO
+     */
+    @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
+    public void save(CategorySaveDTO categorySaveDTO) {
+        Category category = Category.builder()
+                .id(categorySaveDTO.getId())
+                .name(categorySaveDTO.getName())
+                .sort(categorySaveDTO.getSort())
+                .type(categorySaveDTO.getType())
+                .status(StatusConstant.DISABLE)
+                .build();
+        this.save(category);
+    }
+
+    /**
+     * 分类分页查询
+     * @param categoryPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult<CategoryPageQueryVO> page(CategoryPageQueryDTO categoryPageQueryDTO) {
+        IPage<Category> iPage = new Page<>(categoryPageQueryDTO.getPage(), categoryPageQueryDTO.getPageSize());
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.hasText(categoryPageQueryDTO.getName()), Category::getName, categoryPageQueryDTO.getName())
+                .eq(categoryPageQueryDTO.getType() != null, Category::getType, categoryPageQueryDTO.getType())
+                .orderByAsc(Category::getSort);
+        this.page(iPage, wrapper);
+        List<CategoryPageQueryVO> records = iPage.getRecords().stream().map(category -> {
+            CategoryPageQueryVO vo = new CategoryPageQueryVO();
+            BeanUtils.copyProperties(category, vo);
+            return vo;
+        }).toList();
+        return new PageResult<>(iPage.getTotal(), records);
+    }
+
+    /**
+     * 启用禁用分类
+     * @param status
+     * @param id
+     * @return
+     */
+    @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
+    public void updateStatus(Integer status, Long id) {
+        Category category = Category.builder()
+                .id(id)
+                .status(status)
+                .build();
+        this.updateById(category);
+    }
+
+    /**
+     * 修改分类
+     * @param categoryUpdateInfoDTO
+     * @return
+     */
+    @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
+    public void updateInfo(CategoryUpdateInfoDTO categoryUpdateInfoDTO) {
+        Category category = Category.builder()
+                .id(categoryUpdateInfoDTO.getId())
+                .name(categoryUpdateInfoDTO.getName())
+                .sort(categoryUpdateInfoDTO.getSort())
+                .build();
+        this.updateById(category);
+    }
+
+    /**
+     * 根据ID删除分类
+     * @param id
+     * @return
+     */
+    @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
+    public void deleteById(Long id) {
+        Long count = dishMapper.selectCount(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, id));
+        if (count > 0) {
+            throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_DISH);
+        }
+        count = setmealMapper.selectCount(new LambdaQueryWrapper<Setmeal>().eq(Setmeal::getCategoryId, id));
+        if (count > 0) {
+            throw new DeletionNotAllowedException(MessageConstant.CATEGORY_BE_RELATED_BY_SETMEAL);
+        }
+        this.removeById(id);
+    }
+
+    /**
+     * 根据类型查询分类
+     * @param type
+     * @return
+     */
+    @Override
+    @Cacheable(cacheNames = "category:list", key = "#type")
+    public List<Category> listByType(Integer type) {
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(type != null, Category::getType, type)
+                .eq(Category::getStatus, StatusConstant.ENABLE)
+                .orderByAsc(Category::getSort);
+        return this.list(wrapper);
+    }
+}
+```
+
+
+
+### 解决方法
+
+添加上 `@EnableCaching`
+
+```java
+@SpringBootApplication
+@ComponentScan("com.hongs")
+@EnableTransactionManagement
+@EnableCaching
+public class SkyServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SkyServerApplication.class, args);
+    }
+
+}
+```
+
+
+
+## Java 8 date/time type引起的Cache问题
+
+### 问题
+
+默认的 `GenericJackson2JsonRedisSerializer` 使用的 `ObjectMapper` **没有注册 Java 8 时间模块 (`JavaTimeModule`)**，所以它不知道如何处理 `LocalDateTime` 类型，于是报错让你添加 `jackson-datatype-jsr310`。
+
+
+
+### 解决方法
+
+#### 注解
+
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Category implements Serializable {
+    // ... 其他字段 ...
+
+    // 【核心代码】：加上这三个注解，Redis 就能正常存取日期了
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
+
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updateTime;
+
+    // ... 其他字段 ...
+}
+```
+
+
+
+#### Redis配置类修改
+
+```java
+@Configuration
+@Slf4j
+public class RedisConfig {
+
+    private static final String PROJECT_PREFIX = "sky_take_out";
+    private final GenericJackson2JsonRedisSerializer jacksonSerializer;
+
+    /**
+     * 构造函数：初始化序列化器
+     * 在 Config 类实例化时执行一次，配置好所有的序列化规则
+     */
+    public RedisConfig() {
+        log.info("RedisConfig: 初始化序列化器...");
+
+        // 获取基础 ObjectMapper (复用 sky-common 中的时间格式配置)
+        ObjectMapper mapper = JacksonBaseConfig.createObjectMapper();
+
+        // 创建 GenericJackson2JsonRedisSerializer
+        this.jacksonSerializer = new GenericJackson2JsonRedisSerializer(mapper);
+    }
+
+    /**
+     * RedisTemplate 配置
+     * 用于代码中手动操作 Redis (如: redisTemplate.opsForValue().set(...))
+     */
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        log.info("RedisConfig: 开始配置 RedisTemplate...");
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
+        // Key 序列化：使用 String
+        // 原因：Key 通常是字符串，使用 String 序列化后在 Redis 客户端(RDM)中可读性强，方便调试
+        template.setKeySerializer(stringSerializer);
+        template.setHashKeySerializer(stringSerializer);
+
+        // Value 序列化：使用 JSON (复用成员变量)
+        // 原因：Value 通常是对象，需要转为 JSON 存储。复用上面的 jacksonSerializer 确保能处理日期和多态类型。
+        template.setValueSerializer(this.jacksonSerializer);
+        template.setHashValueSerializer(this.jacksonSerializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    /**
+     * RedisCacheConfiguration 配置
+     */
+    @Bean
+    public RedisCacheConfiguration redisCacheConfiguration() {
+        log.info("RedisConfig: 开始配置 RedisCacheConfiguration...");
+
+        return RedisCacheConfiguration.defaultCacheConfig()
+                // Key 使用 String 序列化
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                // Value 使用 JSON 序列化
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(this.jacksonSerializer))
+                // 不缓存 null 值，防止缓存穿透/击穿时的误判
+                .disableCachingNullValues()
+                // 设置默认过期时间 (例如 1 小时)，防止缓存无限堆积
+                .entryTtl(Duration.ofHours(1))
+                // 统一前缀格式: sky_take_out:模块名:维度:
+                .computePrefixWith(name -> PROJECT_PREFIX + ":" + name + ":");
+    }
+}
+```
+
+
+
+# 2026年1月6日
+
+## 更新菜品导致的缓存未及时更新错误
+
+**<font color='red'>修改菜品可能会出现从一个分类到另一个分类，这个时候要多考虑清楚的Cache。</font>**
+
+**<font color='red'>注意：不要为了省一点 Redis 的力气，却要让 MySQL 多跑一趟，得不偿失。</font>**
+
+由于修改无法传回先前的分类ID，需要用数据库查一遍，这样很消耗性能，不如直接全部删除。
+
+### 修改前
+
+```java
+    /**
+     * 修改菜品
+     * @param dishSaveDTO
+     */
+    @Transactional
+    @Override
+    @CacheEvict(cacheNames = "dish:list_flavor", key = "#dishSaveDTO.categoryId")
+    public void updateWithFlavor(DishSaveDTO dishSaveDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishSaveDTO, dish);
+        this.updateById(dish);
+
+        List<DishFlavor> dtoList = dishSaveDTO.getFlavors();
+        if (dtoList != null) {
+            dtoList.forEach(dto -> dto.setDishId(dish.getId()));
+        } else {
+            dtoList = new ArrayList<>();
+        }
+        List<DishFlavor> dbList = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>()
+                .eq(DishFlavor::getDishId, dish.getId()));
+        Map<String, DishFlavor> dtoMap = dtoList.stream()
+                .collect(Collectors.toMap(DishFlavor::getName, Function.identity(), (old, newOne) -> newOne));
+        Map<String, DishFlavor> dbMap = dbList.stream()
+                .collect(Collectors.toMap(DishFlavor::getName, Function.identity(), (old, newOne) -> newOne));
+
+        List<Long> idsToRemove = dbList.stream()
+                .filter(dishFlavor -> !dtoMap.containsKey(dishFlavor.getName()))
+                .map(DishFlavor::getId)
+                .toList();
+        List<DishFlavor> entitiesToAdd = dtoList.stream()
+                .filter(dishFlavor -> !dbMap.containsKey(dishFlavor.getName()))
+                .toList();
+        List<DishFlavor> entitiesToUpdate = dtoList.stream()
+                .filter(dishFlavor -> dbMap.containsKey(dishFlavor.getName()))
+                .filter(dishFlavor -> !dishFlavor.getValue().equals(dbMap.get(dishFlavor.getName()).getValue()))
+                .peek(dishFlavor -> dishFlavor.setId(dbMap.get(dishFlavor.getName()).getId()))
+                .toList();
+
+        if (!idsToRemove.isEmpty()) {
+            dishFlavorService.removeByIds(idsToRemove);
+        }
+        if (!entitiesToAdd.isEmpty()) {
+            dishFlavorService.saveBatch(entitiesToAdd);
+        }
+        if (!entitiesToUpdate.isEmpty()) {
+            dishFlavorService.updateBatchById(entitiesToUpdate);
+        }
+    }
+```
+
+
+
+### 修改后
+
+```java
+/**
+ * 修改菜品
+ * @param dishSaveDTO
+ */
+@Transactional
+@Override
+@CacheEvict(cacheNames = "dish:list_flavor", allEntries = true)
+public void updateWithFlavor(DishSaveDTO dishSaveDTO) {
+    Dish dish = new Dish();
+    BeanUtils.copyProperties(dishSaveDTO, dish);
+    this.updateById(dish);
+
+    List<DishFlavor> dtoList = dishSaveDTO.getFlavors();
+    if (dtoList != null) {
+        dtoList.forEach(dto -> dto.setDishId(dish.getId()));
+    } else {
+        dtoList = new ArrayList<>();
+    }
+    List<DishFlavor> dbList = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>()
+            .eq(DishFlavor::getDishId, dish.getId()));
+    Map<String, DishFlavor> dtoMap = dtoList.stream()
+            .collect(Collectors.toMap(DishFlavor::getName, Function.identity(), (old, newOne) -> newOne));
+    Map<String, DishFlavor> dbMap = dbList.stream()
+            .collect(Collectors.toMap(DishFlavor::getName, Function.identity(), (old, newOne) -> newOne));
+
+    List<Long> idsToRemove = dbList.stream()
+            .filter(dishFlavor -> !dtoMap.containsKey(dishFlavor.getName()))
+            .map(DishFlavor::getId)
+            .toList();
+    List<DishFlavor> entitiesToAdd = dtoList.stream()
+            .filter(dishFlavor -> !dbMap.containsKey(dishFlavor.getName()))
+            .toList();
+    List<DishFlavor> entitiesToUpdate = dtoList.stream()
+            .filter(dishFlavor -> dbMap.containsKey(dishFlavor.getName()))
+            .filter(dishFlavor -> !dishFlavor.getValue().equals(dbMap.get(dishFlavor.getName()).getValue()))
+            .peek(dishFlavor -> dishFlavor.setId(dbMap.get(dishFlavor.getName()).getId()))
+            .toList();
+
+    if (!idsToRemove.isEmpty()) {
+        dishFlavorService.removeByIds(idsToRemove);
+    }
+    if (!entitiesToAdd.isEmpty()) {
+        dishFlavorService.saveBatch(entitiesToAdd);
+    }
+    if (!entitiesToUpdate.isEmpty()) {
+        dishFlavorService.updateBatchById(entitiesToUpdate);
+    }
+}
+```
+
+
+
+# 2026年1月8日
+
+## 缓存中出现集合类名信息的缺失
+
+### 问题表现
+
+使用了 `Jackson2JsonRedisSerializer` 出现的问题
+
+![image-20260108231845930](D:\Code_Save\take-out\记录\assets\image-20260108231845930.png)
+
+缺少了集合类名信息 `java.util.ArrayList`，导致缓存中的数据无法反序列化读出来。
+
+
+
+### 问题原因
+
+```java
+@Override
+@Cacheable(cacheNames = "dish:list_flavor", key = "#categoryId")
+public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long categoryId) {
+    List<Dish> dishList = this.listByCategoryId(categoryId);
+    if (dishList.isEmpty()) {
+        return new ArrayList<>();
+    }
+
+    List<Long> dishIds = dishList.stream().map(Dish::getId).toList();
+
+    Map<Long, List<DishFlavor>> flavorMap = dishFlavorService
+            .list(new LambdaQueryWrapper<DishFlavor>()
+                    .in(DishFlavor::getDishId, dishIds))
+            .stream()
+            .collect(Collectors.groupingBy(DishFlavor::getDishId));
+
+    return dishList.stream()
+            .map(dish -> {
+                DishGetOneByIdVO dishGetOneByIdVO = new DishGetOneByIdVO();
+                BeanUtils.copyProperties(dish, dishGetOneByIdVO);
+                dishGetOneByIdVO.setFlavors(flavorMap.getOrDefault(dish.getId(), new ArrayList<>()));
+                return dishGetOneByIdVO;
+            }).toList();
+}
+```
+
+
+
+- **`listWithFlavorByCategoryId`** 方法最后使用了 `.toList()` (Java 16+ 新特性)。
+- `Stream.toList()` 返回的是 `java.util.ImmutableCollections$ListN`（一种内部的、不可变的 List 实现）。
+- **问题所在**：当 Redis 序列化器尝试处理这个不可变 List 时，Jackson 往往不会像处理 `ArrayList` 那样自动添加 `["java.util.ArrayList", ...]` 这种类型包装，或者它记录的类型是内部私有类 `ImmutableCollections`，导致反序列化时 Spring Cache 无法将其还原，或者报错提示缺少预期的类型头。
+
+> 后续使用了 `GenericJackson2JsonRedisSerializer` json中不包括类信息

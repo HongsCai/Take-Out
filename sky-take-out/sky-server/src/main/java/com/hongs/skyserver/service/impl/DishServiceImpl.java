@@ -24,6 +24,8 @@ import com.hongs.skyserver.service.SetmealDishService;
 import com.hongs.skyserver.service.SetmealService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "dish:list_flavor", key = "#dishSaveDTO.categoryId")
     public void saveWithFlavor(DishSaveDTO dishSaveDTO) {
         // 向菜品表插入一条数据
         Dish dish = new Dish();
@@ -89,6 +92,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "dish:list_flavor", allEntries = true)
     public void deleteBatchByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return;
@@ -144,6 +148,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Transactional
     @Override
+    @CacheEvict(cacheNames = "dish:list_flavor", allEntries = true)
     public void updateWithFlavor(DishSaveDTO dishSaveDTO) {
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishSaveDTO, dish);
@@ -193,6 +198,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      */
     @Override
     @Transactional
+    @CacheEvict(cacheNames = "dish:list_flavor", allEntries = true)
     public void updateStatus(Integer status, Long id) {
         // 如果是停售操作，需要处理关联的套餐
         if (status.equals(StatusConstant.DISABLE)) {
@@ -219,22 +225,31 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
 
     /**
      * 根据分类ID查询菜品及口味
-     * @param id
+     * @param categoryId
      * @return
      */
     @Override
-    public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long id) {
-        return this.listByCategoryId(id).stream()
+    @Cacheable(cacheNames = "dish:list_flavor", key = "#categoryId")
+    public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long categoryId) {
+        List<Dish> dishList = this.listByCategoryId(categoryId);
+        if (dishList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Long> dishIds = dishList.stream().map(Dish::getId).toList();
+
+        Map<Long, List<DishFlavor>> flavorMap = dishFlavorService
+                .list(new LambdaQueryWrapper<DishFlavor>()
+                        .in(DishFlavor::getDishId, dishIds))
+                .stream()
+                .collect(Collectors.groupingBy(DishFlavor::getDishId));
+
+        return dishList.stream()
                 .map(dish -> {
                     DishGetOneByIdVO dishGetOneByIdVO = new DishGetOneByIdVO();
                     BeanUtils.copyProperties(dish, dishGetOneByIdVO);
-                    dishGetOneByIdVO.setFlavors(dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>()
-                            .eq(DishFlavor::getDishId, dish.getId())));
+                    dishGetOneByIdVO.setFlavors(flavorMap.getOrDefault(dish.getId(), new ArrayList<>()));
                     return dishGetOneByIdVO;
-                }).toList();
+                }).collect(Collectors.toList());
     }
 }
-
-
-
-

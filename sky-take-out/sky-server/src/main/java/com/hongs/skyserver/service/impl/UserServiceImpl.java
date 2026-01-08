@@ -2,12 +2,9 @@ package com.hongs.skyserver.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hongs.skycommon.constant.JwtClaimsConstant;
 import com.hongs.skycommon.constant.MessageConstant;
 import com.hongs.skycommon.exception.LoginFailedException;
-import com.hongs.skycommon.exception.UserNotLoginException;
-import com.hongs.skycommon.json.JacksonObjectMapper;
 import com.hongs.skycommon.pojo.dto.UserLoginDTO;
 import com.hongs.skycommon.pojo.entity.User;
 import com.hongs.skycommon.pojo.vo.UserLoginVO;

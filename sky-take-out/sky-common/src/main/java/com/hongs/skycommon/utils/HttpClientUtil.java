@@ -1,7 +1,8 @@
 package com.hongs.skycommon.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hongs.skycommon.json.JacksonObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hongs.skycommon.json.JacksonBaseConfig;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -25,7 +26,7 @@ public class HttpClientUtil {
     private final static String CHARSET = "UTF-8";
     private final static String CONTENT_TYPE_JSON = "application/json";
 
-    private final static JacksonObjectMapper objectMapper = new JacksonObjectMapper();
+    private final static ObjectMapper objectMapper = JacksonBaseConfig.createObjectMapper();
 
     private static RequestConfig builderRequestConfig() {
         return RequestConfig.custom()

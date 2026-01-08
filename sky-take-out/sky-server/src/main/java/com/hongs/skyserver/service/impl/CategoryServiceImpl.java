@@ -22,6 +22,9 @@ import com.hongs.skyserver.mapper.SetmealMapper;
 import com.hongs.skyserver.service.CategoryService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -47,6 +50,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
      * @param categorySaveDTO
      */
     @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
     public void save(CategorySaveDTO categorySaveDTO) {
         Category category = Category.builder()
                 .id(categorySaveDTO.getId())
@@ -86,6 +90,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
      * @return
      */
     @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
     public void updateStatus(Integer status, Long id) {
         Category category = Category.builder()
                 .id(id)
@@ -100,6 +105,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
      * @return
      */
     @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
     public void updateInfo(CategoryUpdateInfoDTO categoryUpdateInfoDTO) {
         Category category = Category.builder()
                 .id(categoryUpdateInfoDTO.getId())
@@ -115,6 +121,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
      * @return
      */
     @Override
+    @CacheEvict(cacheNames = "category:list", allEntries = true)
     public void deleteById(Long id) {
         Long count = dishMapper.selectCount(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, id));
         if (count > 0) {
@@ -133,13 +140,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
      * @return
      */
     @Override
+    @Cacheable(cacheNames = "category:list", key = "#type != null ? #type : 'all'")
     public List<Category> listByType(Integer type) {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(type != null, Category::getType, type);
+        wrapper.eq(type != null, Category::getType, type)
+                .eq(Category::getStatus, StatusConstant.ENABLE)
+                .orderByAsc(Category::getSort);
         return this.list(wrapper);
     }
 }
-
-
-
-

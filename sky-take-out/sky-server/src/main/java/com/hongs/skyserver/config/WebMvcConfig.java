@@ -1,7 +1,7 @@
 package com.hongs.skyserver.config;
 
 
-import com.hongs.skycommon.json.JacksonObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hongs.skyserver.interceptor.JwtTokenAdminInterceptor;
 import com.hongs.skyserver.interceptor.JwtTokenUserInterceptor;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -29,6 +29,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     private JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
     @Autowired
     private JwtTokenUserInterceptor jwtTokenUserInterceptor;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * 注册自定义拦截器
@@ -91,7 +93,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
         // 2. 需要为消息转换器设置一个对象转换器，对象转换器可以将 Java 对象序列化为 JSON 数据
-        converter.setObjectMapper(new JacksonObjectMapper());
+        converter.setObjectMapper(objectMapper);
 
         // 3. 将自己的消息转换器加入到容器中
         converters.add(1, converter);

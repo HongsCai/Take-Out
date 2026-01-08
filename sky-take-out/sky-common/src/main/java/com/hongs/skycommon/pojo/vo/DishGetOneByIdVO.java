@@ -12,7 +12,6 @@ import java.util.List;
 
 @Data
 @Schema(description = "根据ID查询菜品VO")
-
 public class DishGetOneByIdVO implements Serializable {
 
     @Schema(description = "ID")
