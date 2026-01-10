@@ -42,5 +42,5 @@ public class DishGetOneByIdVO implements Serializable {
     private String categoryName;
 
     @Schema(description = "菜品口味")
-    private List<DishFlavor> flavors = new ArrayList<>();
+    private List<DishFlavor> flavors;
 }

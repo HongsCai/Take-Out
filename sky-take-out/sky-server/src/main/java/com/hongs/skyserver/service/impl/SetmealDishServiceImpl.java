@@ -9,6 +9,7 @@ import com.hongs.skyserver.mapper.SetmealDishMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * @author Hongs
@@ -30,7 +31,7 @@ public class SetmealDishServiceImpl extends ServiceImpl<SetmealDishMapper, Setme
                 .eq(SetmealDish::getDishId, dishId));
         return setmealDishes.stream().map(setmealDish -> {
             return setmealDish.getSetmealId();
-        }).toList();
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -40,11 +41,11 @@ public class SetmealDishServiceImpl extends ServiceImpl<SetmealDishMapper, Setme
      */
     @Override
     public List<Long> getDishIdsBySetmealId(Long setmealId) {
-        List<SetmealDish> setmealDishes = this.list(new LambdaQueryWrapper<SetmealDish>()
+        List<SetmealDish> setmealDishList = this.list(new LambdaQueryWrapper<SetmealDish>()
                 .eq(SetmealDish::getSetmealId, setmealId));
-        return setmealDishes.stream().map(setmealDish -> {
-            return setmealDish.getDishId();
-        }).toList();
+        return setmealDishList.stream()
+                .map(SetmealDish::getDishId)
+                .collect(Collectors.toList());
     }
 
     @Override

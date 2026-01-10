@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
 * @author Hongs
@@ -132,7 +133,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
             EmployeePageQueryVO employeePageQueryVO = new EmployeePageQueryVO();
             BeanUtils.copyProperties(employee, employeePageQueryVO);
             return employeePageQueryVO;
-        }).toList();
+        }).collect(Collectors.toList());
 
         return new PageResult<EmployeePageQueryVO>(page.getTotal(), employeePageQueryVOList);
     }

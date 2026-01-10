@@ -1,6 +1,4 @@
 package com.hongs.skyserver.service.impl;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -170,15 +168,15 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
         List<Long> idsToRemove = dbList.stream()
                 .filter(dishFlavor -> !dtoMap.containsKey(dishFlavor.getName()))
                 .map(DishFlavor::getId)
-                .toList();
+                .collect(Collectors.toList());
         List<DishFlavor> entitiesToAdd = dtoList.stream()
                 .filter(dishFlavor -> !dbMap.containsKey(dishFlavor.getName()))
-                .toList();
+                .collect(Collectors.toList());
         List<DishFlavor> entitiesToUpdate = dtoList.stream()
                 .filter(dishFlavor -> dbMap.containsKey(dishFlavor.getName()))
                 .filter(dishFlavor -> !dishFlavor.getValue().equals(dbMap.get(dishFlavor.getName()).getValue()))
                 .peek(dishFlavor -> dishFlavor.setId(dbMap.get(dishFlavor.getName()).getId()))
-                .toList();
+                .collect(Collectors.toList());
 
         if (!idsToRemove.isEmpty()) {
             dishFlavorService.removeByIds(idsToRemove);
@@ -229,6 +227,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
      * @return
      */
     @Override
+    @Transactional
     @Cacheable(cacheNames = "dish:list_flavor", key = "#categoryId")
     public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long categoryId) {
         List<Dish> dishList = this.listByCategoryId(categoryId);
@@ -236,7 +235,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish>
             return new ArrayList<>();
         }
 
-        List<Long> dishIds = dishList.stream().map(Dish::getId).toList();
+        List<Long> dishIds = dishList.stream().map(Dish::getId).collect(Collectors.toList());
 
         Map<Long, List<DishFlavor>> flavorMap = dishFlavorService
                 .list(new LambdaQueryWrapper<DishFlavor>()

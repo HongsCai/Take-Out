@@ -150,16 +150,17 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal>
 
         List<Long> idsToRemove = dbList.stream()
                 .filter(dbSetmealDish -> !dtoMap.containsKey(dbSetmealDish.getDishId()))
-                .map(SetmealDish::getId).toList();
+                .map(SetmealDish::getId)
+                .collect(Collectors.toList());
         List<SetmealDish> entitiesToAdd = dtoList.stream()
                 .filter(setmealDish -> !dbMap.containsKey(setmealDish.getDishId()))
-                .toList();
+                .collect(Collectors.toList());
         List<SetmealDish> entitiesToUpdate = dtoList.stream()
                 .filter(setmealDish -> dbMap.containsKey(setmealDish.getDishId()))
                 .filter(setmealDish -> !dbMap.get(setmealDish.getDishId()).getCopies().equals(setmealDish.getCopies()))
                 .peek(setmealDish -> {
                     setmealDish.setId(dbMap.get(setmealDish.getDishId()).getId());
-                }).toList();
+                }).collect(Collectors.toList());
 
         if (!idsToRemove.isEmpty()) {
             setmealDishService.removeByIds(idsToRemove);

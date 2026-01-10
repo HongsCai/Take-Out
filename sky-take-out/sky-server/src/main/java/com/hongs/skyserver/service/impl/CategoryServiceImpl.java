@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * @author Hongs
@@ -79,7 +80,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category>
             CategoryPageQueryVO vo = new CategoryPageQueryVO();
             BeanUtils.copyProperties(category, vo);
             return vo;
-        }).toList();
+        }).collect(Collectors.toList());
         return new PageResult<>(iPage.getTotal(), records);
     }
 
