@@ -12,7 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
-import com.hongs.skycommon.constant.JacksonConstants;
+import com.hongs.skycommon.constant.DefaultConstant;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,17 +53,17 @@ public class JacksonBaseConfig {
         // 当后端返回 LocalDateTime 对象时，自动转为 "yyyy-MM-dd HH:mm:ss" 格式的字符串
         SimpleModule timeModule = new SimpleModule()
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(
-                        DateTimeFormatter.ofPattern(JacksonConstants.DEFAULT_DATE_TIME_FORMAT)))
+                        DateTimeFormatter.ofPattern(DefaultConstant.DEFAULT_DATE_TIME_FORMAT)))
                 .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(
-                        DateTimeFormatter.ofPattern(JacksonConstants.DEFAULT_DATE_TIME_FORMAT)))
+                        DateTimeFormatter.ofPattern(DefaultConstant.DEFAULT_DATE_TIME_FORMAT)))
                 .addSerializer(LocalDate.class, new LocalDateSerializer(
-                        DateTimeFormatter.ofPattern(JacksonConstants.DEFAULT_DATE_FORMAT)))
+                        DateTimeFormatter.ofPattern(DefaultConstant.DEFAULT_DATE_FORMAT)))
                 .addDeserializer(LocalDate.class, new LocalDateDeserializer(
-                        DateTimeFormatter.ofPattern(JacksonConstants.DEFAULT_DATE_FORMAT)))
+                        DateTimeFormatter.ofPattern(DefaultConstant.DEFAULT_DATE_FORMAT)))
                 .addSerializer(LocalTime.class, new LocalTimeSerializer(
-                        DateTimeFormatter.ofPattern(JacksonConstants.DEFAULT_TIME_FORMAT)))
+                        DateTimeFormatter.ofPattern(DefaultConstant.DEFAULT_TIME_FORMAT)))
                 .addDeserializer(LocalTime.class, new LocalTimeDeserializer(
-                        DateTimeFormatter.ofPattern(JacksonConstants.DEFAULT_TIME_FORMAT)));
+                        DateTimeFormatter.ofPattern(DefaultConstant.DEFAULT_TIME_FORMAT)));
         mapper.registerModule(timeModule);
         return mapper;
     }

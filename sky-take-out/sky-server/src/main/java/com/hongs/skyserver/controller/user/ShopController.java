@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.hongs.skycommon.constant.RedisConstant.SHOP_STATUS_KEY;
-
 /**
  * 店铺管理
  */
@@ -32,7 +30,7 @@ public class ShopController {
     @Operation(summary = "获取营业状态")
     @GetMapping("/status")
     public Result<Integer> getStatus() {
-        Integer status = (Integer) redisTemplate.opsForValue().get(SHOP_STATUS_KEY);
+        Integer status = (Integer) redisTemplate.opsForValue().get("sky_take_out:shop:status");
         log.info("获得营业状态: {}", status);
         return Result.success(status);
     }

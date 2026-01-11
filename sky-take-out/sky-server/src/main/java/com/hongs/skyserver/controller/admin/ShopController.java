@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import static com.hongs.skycommon.constant.RedisConstant.SHOP_STATUS_KEY;
-
 /**
  * 店铺管理
  */
@@ -33,7 +31,7 @@ public class ShopController {
     @PutMapping("/{status}")
     public Result setStatus(@PathVariable Integer status) {
         log.info("设置营业状态: {}", status.equals(StatusConstant.ENABLE) ? "营业中" : "打烊中");
-        redisTemplate.opsForValue().set(SHOP_STATUS_KEY, status);
+        redisTemplate.opsForValue().set("sky_take_out:shop:status", status);
         return Result.success();
     }
 
@@ -45,7 +43,7 @@ public class ShopController {
     @Operation(summary = "获取营业状态")
     @GetMapping("/status")
     public Result<Integer> getStatus() {
-        Integer status = (Integer) redisTemplate.opsForValue().get(SHOP_STATUS_KEY);
+        Integer status = (Integer) redisTemplate.opsForValue().get("sky_take_out:shop:status");
         log.info("获得营业状态: {}", status);
         return Result.success(status);
     }
