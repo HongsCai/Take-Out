@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2026-01-12 23:32:11
 * @Entity com.hongs.skycommon.pojo.entity.Orders
 */
-public interface OrdersMapper extends BaseMapper<Orders> {
+public interface OrderMapper extends BaseMapper<Orders> {
 
 }
 
