@@ -1028,7 +1028,7 @@ public void updateWithFlavor(DishSaveDTO dishSaveDTO) {
 
 使用了 `Jackson2JsonRedisSerializer` 出现的问题
 
-![image-20260108231845930](D:\Code_Save\take-out\记录\assets\image-20260108231845930.png)
+![image-20260108231845930](.\assets\image-20260108231845930.png)
 
 缺少了集合类名信息 `java.util.ArrayList`，导致缓存中的数据无法反序列化读出来。
 
