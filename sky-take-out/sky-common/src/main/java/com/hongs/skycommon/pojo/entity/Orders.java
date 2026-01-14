@@ -43,7 +43,6 @@ public class Orders implements Serializable {
     /**
      * 下单时间
      */
-    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime orderTime;
 
     /**
