@@ -1070,3 +1070,17 @@ public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long categoryId) {
 - **问题所在**：当 Redis 序列化器尝试处理这个不可变 List 时，Jackson 往往不会像处理 `ArrayList` 那样自动添加 `["java.util.ArrayList", ...]` 这种类型包装，或者它记录的类型是内部私有类 `ImmutableCollections`，导致反序列化时 Spring Cache 无法将其还原，或者报错提示缺少预期的类型头。
 
 > 后续使用了 `GenericJackson2JsonRedisSerializer` json中不包括类信息
+
+
+
+# 2026年1月15日
+
+## 微信小程序在真机调试下对内网穿透下的公网IP发送请求失败
+
+![image-20260116000243974](./assets/image-20260116000243974.png)
+
+
+
+后续排查出来是证书链出现了问题，原因在于直接使用了 Sakura Frp 的TCP映射，导致 **SSL证书链不完整** 故而，采用子域完善SSL证书。
+
+![image-20260115235413040](./assets/image-20260115235413040.png)
