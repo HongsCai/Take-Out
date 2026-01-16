@@ -2,6 +2,8 @@ package com.hongs.skyserver.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hongs.skycommon.constant.MessageConstant;
 import com.hongs.skycommon.constant.OrderConstant;
@@ -9,11 +11,13 @@ import com.hongs.skycommon.context.BaseContext;
 import com.hongs.skycommon.exception.AddressBookBusinessException;
 import com.hongs.skycommon.exception.OrderBusinessException;
 import com.hongs.skycommon.exception.ShoppingCartBusinessException;
+import com.hongs.skycommon.pojo.dto.OrderPaymentDTO;
 import com.hongs.skycommon.pojo.dto.OrderSubmitDTO;
 import com.hongs.skycommon.pojo.entity.AddressBook;
 import com.hongs.skycommon.pojo.entity.OrderDetail;
 import com.hongs.skycommon.pojo.entity.Orders;
 import com.hongs.skycommon.pojo.entity.ShoppingCart;
+import com.hongs.skycommon.pojo.vo.OrderPaymentVO;
 import com.hongs.skycommon.pojo.vo.OrderSubmitVO;
 import com.hongs.skyserver.mapper.OrderMapper;
 import com.hongs.skyserver.service.AddressBookService;
@@ -43,7 +47,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
     private ShoppingCartService shoppingCartService;
     @Autowired
     private OrderDetailService orderDetailService;
-
 
     /**
      * 用户下单
@@ -109,5 +112,36 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
                 .orderNumber(orders.getNumber())
                 .orderTime(orders.getOrderTime())
                 .build();
+    }
+
+    /**
+     * 订单支付
+     * @param orderPaymentDTO
+     * @return
+     */
+    @Override
+    public OrderPaymentVO payment(OrderPaymentDTO orderPaymentDTO) {
+        // TODO 由于无商户证明，这里跳过微信支付
+
+        paySuccess(orderPaymentDTO.getOrderNumber());
+
+        return new OrderPaymentVO();
+    }
+
+    /**
+     * 支付成功
+     * 修改订单状态
+     * @param outTradeNo
+     */
+    @Override
+    public void paySuccess(String outTradeNo) {
+        // 根据订单号查询订单
+        // 根据订单号查询订单并更新更新订单的状态、支付方式、支付状态、结账时间
+        this.update(new LambdaUpdateWrapper<Orders>()
+                .eq(Orders::getNumber, outTradeNo)
+                .set(Orders::getStatus, OrderConstant.TO_BE_CONFIRMED)
+                .set(Orders::getPayMethod, OrderConstant.WECHAT)
+                .set(Orders::getPayStatus, OrderConstant.PAID)
+                .set(Orders::getCheckoutTime, LocalDateTime.now()));
     }
 }

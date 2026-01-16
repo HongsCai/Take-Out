@@ -1,8 +1,10 @@
 package com.hongs.skyserver.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.hongs.skycommon.pojo.dto.OrderPaymentDTO;
 import com.hongs.skycommon.pojo.dto.OrderSubmitDTO;
 import com.hongs.skycommon.pojo.entity.Orders;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.hongs.skycommon.pojo.vo.OrderPaymentVO;
 import com.hongs.skycommon.pojo.vo.OrderSubmitVO;
 
 /**
@@ -19,6 +21,17 @@ public interface OrderService extends IService<Orders> {
      */
     OrderSubmitVO submit(OrderSubmitDTO orderSubmitDTO);
 
+    /**
+     * 订单支付
+     * @param orderPaymentDTO
+     * @return
+     */
+    OrderPaymentVO payment(OrderPaymentDTO orderPaymentDTO);
 
-
+    /**
+     * 支付成功
+     * 修改订单状态
+     * @param outTradeNo
+     */
+    void paySuccess(String outTradeNo);
 }

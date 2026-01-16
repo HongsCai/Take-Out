@@ -223,34 +223,48 @@ var _api = __webpack_require__(/*! @/pages/api/api.js */ 24);function ownKeys(ob
 
         (0, _api.paymentOrder)(params).then(function (res) {
           if (res.code === 1) {
-            wx.requestPayment({
-              nonceStr: res.data.nonceStr,
-              package: res.data.packageStr,
-              paySign: res.data.paySign,
-              timeStamp: res.data.timeStamp,
-              signType: res.data.signType,
-              success:function(res){
-                wx.showModal({
-                  title: '提示',
-                  content: '支付成功',
-                  success:function(){
-                    uni.redirectTo({url: '/pages/success/index?orderId=' + _this.orderId });
-                  }
-                })
-                console.log('支付成功!')
-              }
-            })
-
-
-            //uni.redirectTo({url: '/pages/success/index?orderId=' + _this.orderId });
-
+            // 跳过微信支付逻辑 (wx.requestPayment)，直接认为支付成功
+            wx.showToast({ title: '支付成功', icon: 'success' });
+            
+            setTimeout(function() {
+              uni.redirectTo({ url: '/pages/success/index?orderId=' + _this.orderId });
+            }, 1500);
+            
           } else {
-            wx.showModal({
-              title: '提示',
-              content: res.msg
-            })
+            wx.showModal({ title: '提示', content: '订单生成失败' });
           }
         });
+
+        // (0, _api.paymentOrder)(params).then(function (res) {
+        //   if (res.code === 1) {
+        //     wx.requestPayment({
+        //       nonceStr: res.data.nonceStr,
+        //       package: res.data.packageStr,
+        //       paySign: res.data.paySign,
+        //       timeStamp: res.data.timeStamp,
+        //       signType: res.data.signType,
+        //       success:function(res){
+        //         wx.showModal({
+        //           title: '提示',
+        //           content: '支付成功',
+        //           success:function(){
+        //             uni.redirectTo({url: '/pages/success/index?orderId=' + _this.orderId });
+        //           }
+        //         })
+        //         console.log('支付成功!')
+        //       }
+        //     })
+
+
+        //     //uni.redirectTo({url: '/pages/success/index?orderId=' + _this.orderId });
+
+        //   } else {
+        //     wx.showModal({
+        //       title: '提示',
+        //       content: res.msg
+        //     })
+        //   }
+        // });
       }
 
     },

@@ -1,7 +1,10 @@
 package com.hongs.skycommon.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -13,6 +16,9 @@ import java.time.LocalDateTime;
  */
 @TableName(value ="orders")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Orders implements Serializable {
     /**
      * 主键
