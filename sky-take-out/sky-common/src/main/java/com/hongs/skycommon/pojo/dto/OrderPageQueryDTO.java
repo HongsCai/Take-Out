@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "订单支付DTO")
+@Schema(description = "历史订单查询DTO")
 public class OrderPageQueryDTO {
 
     @Schema(description = "页码")

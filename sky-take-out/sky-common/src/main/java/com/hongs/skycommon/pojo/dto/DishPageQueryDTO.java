@@ -19,8 +19,8 @@ public class DishPageQueryDTO implements Serializable {
     private Integer status;
 
     @Schema(description = "页码")
-    private int page;
+    private Long page;
 
     @Schema(description = "每页记录数")
-    private int pageSize;
+    private Long pageSize;
 }

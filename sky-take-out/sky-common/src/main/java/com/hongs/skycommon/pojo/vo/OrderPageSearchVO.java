@@ -2,15 +2,21 @@ package com.hongs.skycommon.pojo.vo;
 
 import com.hongs.skycommon.pojo.entity.OrderDetail;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Schema(description = "历史订单查询VO")
-public class OrderPageQueryVO {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "订单搜索VO")
+public class OrderPageSearchVO {
 
     @Schema(description = "ID")
     private Long id;
@@ -26,13 +32,13 @@ public class OrderPageQueryVO {
 
     @Schema(description = "地址id")
     private Long addressBookId;
-    
+
     @Schema(description = "下单时间")
     private LocalDateTime orderTime;
-    
+
     @Schema(description = "结账时间")
     private LocalDateTime checkoutTime;
-    
+
     @Schema(description = "支付方式 1微信,2支付宝")
     private Integer payMethod;
 
@@ -41,25 +47,25 @@ public class OrderPageQueryVO {
 
     @Schema(description = "实收金额")
     private BigDecimal amount;
-    
+
     @Schema(description = "备注")
     private String remark;
 
     @Schema(description = "用户名称")
     private String userName;
-    
+
     @Schema(description = "手机号")
     private String phone;
 
     @Schema(description = "地址")
     private String address;
-    
+
     @Schema(description = "收货人")
     private String consignee;
 
     @Schema(description = "订单取消原因")
     private String cancelReason;
-    
+
     @Schema(description = "订单拒绝原因")
     private String rejectionReason;
 
@@ -84,6 +90,7 @@ public class OrderPageQueryVO {
     @Schema(description = "餐具数量状态  1按餐量提供  0选择具体数量")
     private Integer tablewareStatus;
 
-    @Schema(description = "订单详情")
-    private List<OrderDetail> orderDetailList;
+    @Schema(description = "订单包含的菜品 以字符串形式展示")
+    private String orderDishes;
+
 }

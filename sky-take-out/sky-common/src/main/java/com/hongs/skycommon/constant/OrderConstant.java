@@ -18,8 +18,6 @@ public class OrderConstant {
     public static final Integer COMPLETED = 5;
     /** 已取消 */
     public static final Integer CANCELLED = 6;
-    /** 退款 */
-    public static final Integer REFUNDED = 7;
 
     // --- 2. 支付方式 (pay_method) ---
     /** 微信支付 */
