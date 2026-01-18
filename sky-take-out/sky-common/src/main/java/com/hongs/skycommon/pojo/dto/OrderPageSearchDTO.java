@@ -2,6 +2,7 @@ package com.hongs.skycommon.pojo.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -9,9 +10,11 @@ import java.time.LocalDateTime;
 @Schema(description = "订单搜索DTO")
 public class OrderPageSearchDTO {
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "开始时间")
     private LocalDateTime beginTime;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "结束时间")
     private LocalDateTime endTime;
 

@@ -1084,3 +1084,72 @@ public List<DishGetOneByIdVO> listWithFlavorByCategoryId(Long categoryId) {
 后续排查出来是证书链出现了问题，原因在于直接使用了 Sakura Frp 的TCP映射，导致 **SSL证书链不完整** 故而，采用子域完善SSL证书。
 
 ![image-20260115235413040](./assets/image-20260115235413040.png)
+
+
+
+# 2026年1月18日
+
+## 前端传递字符串类型的时间转换失败
+
+前端传递的时间格式是 standard SQL 格式（中间有**空格**），而 Spring Boot 默认处理 `LocalDateTime` 时通常遵循 ISO-8601 标准（中间是 **`T`**，例如 `2026-01-06T00:00:00`）。因为格式不匹配，导致了 `typeMismatch`。
+
+
+
+### 方法一：在字段上添加注解（推荐，最灵活）
+
+在 `beginTime` 和 `endTime` 字段上添加 `@DateTimeFormat` 注解。
+
+**特别注意**：
+
+- 如果是 **GET 请求**（参数在 URL 中）或 **表单提交**，使用 `@DateTimeFormat`。
+- 如果是 **POST 请求**且参数在 Body 中（JSON 格式），建议同时加上 `@JsonFormat`。
+
+为了保险起见，建议两个都加上：
+
+```Java
+import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
+
+public class OrderPageSearchDTO {
+
+    // 指定前端传入的字符串格式
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") 
+    // 指定后端返回给前端，或接收 JSON 时的格式
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") 
+    private LocalDateTime beginTime;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime endTime;
+
+    // ... 其他字段
+}
+```
+
+
+
+### 方法二：全局配置（如果项目中所有时间格式都一样）
+
+如果不想在每个 DTO 里都加注解，可以在 `application.yml` 或 `application.properties` 中设置全局的时间格式（Spring Boot 2.x/3.x）：
+
+```YAML
+spring:
+  mvc:
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+```
+
+*(注意：全局配置可能会影响其他依赖 ISO 格式的接口，通常方法一更安全。)*
+
+
+
+修复完成
+
+![image-20260118172416367](./assets/image-20260118172416367.png)
+
+
+

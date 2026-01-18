@@ -92,6 +92,13 @@ public interface OrderService extends IService<Orders> {
     void confirm(OrderConfirmDTO orderConfirmDTO);
 
     /**
+     * 管理端查看订单详情
+     * @param id
+     * @return
+     */
+    OrderAdminDetailVO orderAdminDetail(Long id);
+
+    /**
      * 派送订单
      * @param id
      */

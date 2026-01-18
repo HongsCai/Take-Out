@@ -293,7 +293,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
         shoppingCartService.saveBatch(shoppingCartList);
     }
 
-
     /**
      * 管理端取消订单
      * @param orderCancelDTO
@@ -338,14 +337,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
      */
     @Override
     public OrderStatisticsVO statistics() {
-        return OrderStatisticsVO.builder()
-                .deliveryInProgress(this.count(new LambdaQueryWrapper<Orders>()
-                        .eq(Orders::getStatus, OrderConstant.DELIVERY_IN_PROGRESS)))
-                .toBeConfirmed(this.count(new LambdaQueryWrapper<Orders>()
-                        .eq(Orders::getStatus, OrderConstant.TO_BE_CONFIRMED)))
-                .confirmed(this.count(new LambdaQueryWrapper<Orders>()
-                        .eq(Orders::getStatus, OrderConstant.CONFIRMED)))
-                .build();
+        return this.baseMapper.getOrderStatistics();
     }
 
     /**
@@ -420,6 +412,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
     }
 
     /**
+     * 管理端查看订单详情
+     * @param id
+     * @return
+     */
+    @Override
+    public OrderAdminDetailVO orderAdminDetail(Long id) {
+        Orders orders = this.getById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        OrderAdminDetailVO orderAdminDetailVO = new OrderAdminDetailVO();
+        BeanUtils.copyProperties(orders, orderAdminDetailVO);
+
+        // 获取订单菜品-数组
+        orderAdminDetailVO.setOrderDetailList(orderDetailService.list(
+                new LambdaQueryWrapper<OrderDetail>().eq(OrderDetail::getOrderId, id)));
+
+        // 获取订单菜品-字符串形式
+        orderAdminDetailVO.setOrderDishes(getDishesStr(orderAdminDetailVO.getOrderDetailList()));
+
+        return orderAdminDetailVO;
+    }
+
+    /**
      * 派送订单
      * @param id
      */
@@ -488,7 +505,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
      * @return
      */
     private String getDishesStr(List<OrderDetail> details) {
-        // 使用 StringJoiner 或 StringBuilder 提升性能
         return details.stream().map(detail -> {
             String flavor = (detail.getDishFlavor() == null || detail.getDishFlavor().isEmpty())
                     ? "" : "(" + detail.getDishFlavor() + ")";

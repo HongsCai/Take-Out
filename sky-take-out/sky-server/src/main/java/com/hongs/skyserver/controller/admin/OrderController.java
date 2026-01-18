@@ -1,7 +1,10 @@
 package com.hongs.skyserver.controller.admin;
 
-import com.hongs.skycommon.pojo.dto.*;
-import com.hongs.skycommon.pojo.vo.OrderPageQueryVO;
+import com.hongs.skycommon.pojo.dto.OrderCancelDTO;
+import com.hongs.skycommon.pojo.dto.OrderConfirmDTO;
+import com.hongs.skycommon.pojo.dto.OrderPageSearchDTO;
+import com.hongs.skycommon.pojo.dto.OrderRejectionDTO;
+import com.hongs.skycommon.pojo.vo.OrderAdminDetailVO;
 import com.hongs.skycommon.pojo.vo.OrderPageSearchVO;
 import com.hongs.skycommon.pojo.vo.OrderStatisticsVO;
 import com.hongs.skycommon.result.PageResult;
@@ -48,7 +51,7 @@ public class OrderController {
 
     @Operation(summary = "拒单")
     @PutMapping("/rejection")
-    public Result rejection(OrderRejectionDTO orderRejectionDTO) {
+    public Result rejection(@RequestBody OrderRejectionDTO orderRejectionDTO) {
         log.info("拒单: {}", orderRejectionDTO);
         orderService.rejection(orderRejectionDTO);
         return Result.success();
@@ -64,9 +67,9 @@ public class OrderController {
 
     @Operation(summary = "查看订单详情")
     @GetMapping("/details/{id}")
-    public Result<OrderPageQueryVO> orderDetail(@PathVariable Long id) {
+    public Result<OrderAdminDetailVO> orderAdminDetail(@PathVariable Long id) {
         log.info("查看订单详情-订单Id: {}", id);
-        return Result.success(orderService.orderDetail(id));
+        return Result.success(orderService.orderAdminDetail(id));
     }
 
     @Operation(summary = "派送订单")

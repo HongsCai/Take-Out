@@ -11,6 +11,5 @@ public class OrderRejectionDTO {
     Long id;
 
     @Schema(description = "拒单原因")
-    Long rejectionReason;
-
+    String rejectionReason;
 }

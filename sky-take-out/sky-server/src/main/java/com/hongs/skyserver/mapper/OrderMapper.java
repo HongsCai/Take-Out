@@ -2,6 +2,7 @@ package com.hongs.skyserver.mapper;
 
 import com.hongs.skycommon.pojo.entity.Orders;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hongs.skycommon.pojo.vo.OrderStatisticsVO;
 
 /**
 * @author Hongs
@@ -11,8 +12,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface OrderMapper extends BaseMapper<Orders> {
 
+    /**
+     * 获取订单统计信息
+     * @return
+     */
+    OrderStatisticsVO getOrderStatistics();
 }
-
-
-
-

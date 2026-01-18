@@ -52,7 +52,7 @@ public class OrderController {
     @GetMapping("/orderDetail/{id}")
     public Result<OrderPageQueryVO> orderDetail(@PathVariable Long id) {
         log.info("查看订单详情-订单Id: {}", id);
-        return Result.success(orderService.orderDetail( id));
+        return Result.success(orderService.orderDetail(id));
     }
 
     @Operation(summary = "取消订单")

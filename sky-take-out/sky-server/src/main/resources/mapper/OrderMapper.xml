@@ -38,4 +38,13 @@
         rejection_reason,cancel_time,estimated_delivery_time,delivery_status,delivery_time,
         pack_amount,tableware_number,tableware_status
     </sql>
+
+    <select id="getOrderStatistics" resultType="com.hongs.skycommon.pojo.vo.OrderStatisticsVO">
+        SELECT
+            COUNT(CASE WHEN status = 2 THEN 1 END) AS toBeConfirmed,
+            COUNT(CASE WHEN status = 3 THEN 1 END) AS confirmed,
+            COUNT(CASE WHEN status = 4 THEN 1 END) AS deliveryInProgress
+        FROM orders
+        WHERE status IN (2, 3, 4)
+    </select>
 </mapper>
