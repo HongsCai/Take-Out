@@ -110,4 +110,15 @@ public interface OrderService extends IService<Orders> {
      * @return
      */
     PageResult<OrderPageSearchVO> conditionSearch(OrderPageSearchDTO orderPageSearchDTO);
+
+
+    /**
+     * 处理支付超时订单
+     */
+    void processPayTimeOutOrder();
+
+    /**
+     * 处理派送超时订单
+     */
+    void processDeliveryTimeOutOrder();
 }

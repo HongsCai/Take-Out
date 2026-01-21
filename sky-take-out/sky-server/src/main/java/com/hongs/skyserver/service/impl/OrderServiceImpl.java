@@ -25,6 +25,7 @@ import com.hongs.skyserver.service.ShoppingCartService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -497,6 +498,31 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
         }).collect(Collectors.toList());
 
         return new PageResult<>(page.getTotal(), voList);
+    }
+
+    /**
+     * 处理超时订单
+     */
+    @Override
+    public void processPayTimeOutOrder() {
+        this.update(new LambdaUpdateWrapper<Orders>()
+                .eq(Orders::getStatus, OrderConstant.PENDING_PAYMENT)
+                .le(Orders::getOrderTime, LocalDateTime.now().minusMinutes(15))
+                .set(Orders::getStatus, OrderConstant.CANCELLED)
+                .set(Orders::getCancelReason, MessageConstant.ORDER_PAYMENT_TIMEOUT)
+                .set(Orders::getCancelTime, LocalDateTime.now())
+        );
+    }
+
+    /**
+     * 处理派送超时订单
+     */
+    @Override
+    public void processDeliveryTimeOutOrder() {
+        this.update(new LambdaUpdateWrapper<Orders>()
+                .eq(Orders::getStatus, OrderConstant.DELIVERY_IN_PROGRESS)
+                .le(Orders::getDeliveryTime, LocalDateTime.now().minusHours(4))
+                .set(Orders::getStatus, OrderConstant.COMPLETED));
     }
 
     /**
