@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hongs.skycommon.constant.MessageConstant;
 import com.hongs.skycommon.constant.OrderConstant;
 import com.hongs.skycommon.context.BaseContext;
@@ -22,16 +24,16 @@ import com.hongs.skyserver.service.AddressBookService;
 import com.hongs.skyserver.service.OrderDetailService;
 import com.hongs.skyserver.service.OrderService;
 import com.hongs.skyserver.service.ShoppingCartService;
+import com.hongs.skyserver.websocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,6 +53,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
     private ShoppingCartService shoppingCartService;
     @Autowired
     private OrderDetailService orderDetailService;
+    @Autowired
+    private WebSocketServer webSocketServer;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * 用户下单
@@ -148,12 +154,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
     public void paySuccess(String outTradeNo) {
         // 根据订单号查询订单
         // 根据订单号查询订单并更新更新订单的状态、支付方式、支付状态、结账时间
-        this.update(new LambdaUpdateWrapper<Orders>()
-                .eq(Orders::getNumber, outTradeNo)
-                .set(Orders::getStatus, OrderConstant.TO_BE_CONFIRMED)
-                .set(Orders::getPayMethod, OrderConstant.WECHAT)
-                .set(Orders::getPayStatus, OrderConstant.PAID)
-                .set(Orders::getCheckoutTime, LocalDateTime.now()));
+        Orders orders = this.getOne(new LambdaQueryWrapper<Orders>().eq(Orders::getNumber, outTradeNo));
+        orders.setStatus(OrderConstant.TO_BE_CONFIRMED);
+        orders.setPayMethod(OrderConstant.WECHAT);
+        orders.setPayStatus(OrderConstant.PAID);
+        orders.setCheckoutTime(LocalDateTime.now());
+
+        this.updateById( orders);
+
+
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("type", OrderConstant.ORDER_REMIND);
+            map.put("orderId", orders.getId());
+            map.put("content", "订单号：" + outTradeNo);
+
+            String message = objectMapper.writeValueAsString(map);
+            webSocketServer.sendToAllClient(message);
+        } catch (JsonProcessingException e) {
+            log.error("订单支付成功，但解析WebSocket消息失败", e);
+        } catch (Exception e) {
+            log.error("WebSocket消息发送异常", e);
+        }
     }
 
     /**

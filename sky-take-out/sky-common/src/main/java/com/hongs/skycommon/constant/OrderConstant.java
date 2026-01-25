@@ -45,4 +45,10 @@ public class OrderConstant {
     /** 选择具体时间 */
     public static final Integer DELIVERY_SPECIFIED_TIME = 0;
 
+    // --- 6. 订单提醒方式 ---
+    /** 来单提醒 */
+    public static final Integer ORDER_REMIND = 1;
+    /** 顾客催单 */
+    public static final Integer CUSTOMER_URGENT_ORDER = 2;
+
 }
