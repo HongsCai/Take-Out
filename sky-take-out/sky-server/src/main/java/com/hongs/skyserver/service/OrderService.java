@@ -111,7 +111,6 @@ public interface OrderService extends IService<Orders> {
      */
     PageResult<OrderPageSearchVO> conditionSearch(OrderPageSearchDTO orderPageSearchDTO);
 
-
     /**
      * 处理支付超时订单
      */
@@ -121,4 +120,10 @@ public interface OrderService extends IService<Orders> {
      * 处理派送超时订单
      */
     void processDeliveryTimeOutOrder();
+
+    /**
+     * 催单
+     * @param id
+     */
+    void reminder(Long id);
 }

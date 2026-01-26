@@ -163,6 +163,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
         this.updateById( orders);
 
 
+        // 通过WebSocket向客户端推送消息
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("type", OrderConstant.ORDER_REMIND);
@@ -172,9 +173,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
             String message = objectMapper.writeValueAsString(map);
             webSocketServer.sendToAllClient(message);
         } catch (JsonProcessingException e) {
-            log.error("订单支付成功，但解析WebSocket消息失败", e);
-        } catch (Exception e) {
-            log.error("WebSocket消息发送异常", e);
+            log.error("订单支付成功，转换json字符串出错", e);
         }
     }
 
@@ -545,6 +544,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders>
                 .eq(Orders::getStatus, OrderConstant.DELIVERY_IN_PROGRESS)
                 .le(Orders::getDeliveryTime, LocalDateTime.now().minusHours(4))
                 .set(Orders::getStatus, OrderConstant.COMPLETED));
+    }
+
+    /**
+     * 催单
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        Orders ordersDB = this.getById(id);
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("type", OrderConstant.CUSTOMER_URGENT_ORDER);
+            map.put("orderId", ordersDB.getId());
+            map.put("content", "订单号：" + ordersDB.getNumber());
+            String json = objectMapper.writeValueAsString(map);
+            webSocketServer.sendToAllClient(json);
+        } catch (JsonProcessingException e) {
+            log.error("转换json字符串出错", e);
+        }
     }
 
     /**
